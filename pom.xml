@@ -11,6 +11,29 @@
 
     <name>POM Validator Tool</name>
     <description>A Java tool for validating Maven POM files structure, dependencies, and configurations</description>
+    <url>https://github.com/catalis/pom-validator-tool</url>
+    
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    
+    <developers>
+        <developer>
+            <name>Catalis Development Team</name>
+            <email>dev@catalis.com</email>
+            <organization>Catalis</organization>
+        </developer>
+    </developers>
+    
+    <scm>
+        <connection>scm:git:git://github.com/catalis/pom-validator-tool.git</connection>
+        <developerConnection>scm:git:ssh://github.com:catalis/pom-validator-tool.git</developerConnection>
+        <url>https://github.com/catalis/pom-validator-tool/tree/master</url>
+    </scm>
 
     <properties>
         <!-- Java -->

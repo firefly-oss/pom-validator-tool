@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/Users/ancongui/Library/Java/JavaVirtualMachines/temurin-21.0.7/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/ancongui/Development/pom-validator-tool/target/surefire/surefirebooter-20250807143016102_3.jar /Users/ancongui/Development/pom-validator-tool/target/surefire 2025-08-07T14-30-16_076-jvmRun1 surefire-20250807143016102_1tmp surefire_0-20250807143016102_2tmp"/>
+    <property name="sun.java.command" value="/Users/ancongui/Development/pom-validator-tool/target/surefire/surefirebooter-20250807145501036_3.jar /Users/ancongui/Development/pom-validator-tool/target/surefire 2025-08-07T14-55-01_007-jvmRun1 surefire-20250807145501036_1tmp surefire_0-20250807145501036_2tmp"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/Users/ancongui/Development/pom-validator-tool/target/test-classes:/Users/ancongui/Development/pom-validator-tool/target/classes:/Users/ancongui/.m2/repository/org/apache/maven/maven-model/3.9.6/maven-model-3.9.6.jar:/Users/ancongui/.m2/repository/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar:/Users/ancongui/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.16.1/jackson-databind-2.16.1.jar:/Users/ancongui/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.16.1/jackson-annotations-2.16.1.jar:/Users/ancongui/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.16.1/jackson-core-2.16.1.jar:/Users/ancongui/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.16.1/jackson-dataformat-yaml-2.16.1.jar:/Users/ancongui/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/Users/ancongui/.m2/repository/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar:/Users/ancongui/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.1/junit-jupiter-5.10.1.jar:/Users/ancongui/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.1/junit-jupiter-api-5.10.1.jar:/Users/ancongui/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/ancongui/.m2/repository/org/junit/platform/junit-platform-commons/1.10.1/junit-platform-commons-1.10.1.jar:/Users/ancongui/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/ancongui/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.1/junit-jupiter-params-5.10.1.jar:/Users/ancongui/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.1/junit-jupiter-engine-5.10.1.jar:/Users/ancongui/.m2/repository/org/junit/platform/junit-platform-engine/1.10.1/junit-platform-engine-1.10.1.jar:/Users/ancongui/.m2/repository/org/mockito/mockito-core/5.8.0/mockito-core-5.8.0.jar:/Users/ancongui/.m2/repository/net/bytebuddy/byte-buddy/1.14.10/byte-buddy-1.14.10.jar:/Users/ancongui/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.10/byte-buddy-agent-1.14.10.jar:/Users/ancongui/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/ancongui/.m2/repository/org/assertj/assertj-core/3.25.1/assertj-core-3.25.1.jar:"/>
@@ -29,7 +29,7 @@
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="apple.awt.application.name" value="ForkedBooter"/>
-    <property name="surefire.real.class.path" value="/Users/ancongui/Development/pom-validator-tool/target/surefire/surefirebooter-20250807143016102_3.jar"/>
+    <property name="surefire.real.class.path" value="/Users/ancongui/Development/pom-validator-tool/target/surefire/surefirebooter-20250807145501036_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.runtime.version" value="21.0.7+6-LTS"/>
@@ -58,8 +58,8 @@
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="shouldReturnErrorWhenPomIsInvalid" classname="com.catalis.tools.pomvalidator.service.PomValidationServiceTest" time="0.046"/>
+  <testcase name="shouldReturnErrorWhenPomIsInvalid" classname="com.catalis.tools.pomvalidator.service.PomValidationServiceTest" time="0.049"/>
   <testcase name="shouldReturnErrorWhenPomFileDoesNotExist" classname="com.catalis.tools.pomvalidator.service.PomValidationServiceTest" time="0.003"/>
   <testcase name="shouldReturnErrorWhenPathIsNotFile" classname="com.catalis.tools.pomvalidator.service.PomValidationServiceTest" time="0.001"/>
-  <testcase name="shouldValidateMinimalPom" classname="com.catalis.tools.pomvalidator.service.PomValidationServiceTest" time="0.006"/>
+  <testcase name="shouldValidateMinimalPom" classname="com.catalis.tools.pomvalidator.service.PomValidationServiceTest" time="0.005"/>
 </testsuite>

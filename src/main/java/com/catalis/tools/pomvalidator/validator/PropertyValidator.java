@@ -77,7 +77,8 @@ public class PropertyValidator implements PomValidator {
         }
         
         if (javaVersion != null) {
-            if (compilerSource != null && !compilerSource.equals(javaVersion)) {
+            // Only flag mismatch if compilerSource is not a property reference
+            if (compilerSource != null && !compilerSource.equals(javaVersion) && !compilerSource.contains("${java.version}")) {
                 result.warning(ValidationIssue.of(
                     "Java version and compiler source mismatch: " + javaVersion + " vs " + compilerSource,
                     "Set <maven.compiler.source>${java.version}</maven.compiler.source> to use the java.version property"
