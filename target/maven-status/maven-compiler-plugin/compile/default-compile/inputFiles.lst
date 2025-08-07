@@ -9,3 +9,4 @@
 /Users/ancongui/Development/pom-validator-tool/src/main/java/com/catalis/tools/pomvalidator/model/ValidationResult.java
 /Users/ancongui/Development/pom-validator-tool/src/main/java/com/catalis/tools/pomvalidator/service/PomValidationService.java
 /Users/ancongui/Development/pom-validator-tool/src/main/java/com/catalis/tools/pomvalidator/validator/BestPracticesValidator.java
+/Users/ancongui/Development/pom-validator-tool/src/main/java/com/catalis/tools/pomvalidator/model/ValidationIssue.java

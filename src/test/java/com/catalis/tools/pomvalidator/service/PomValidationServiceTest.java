@@ -23,7 +23,7 @@ class PomValidationServiceTest {
         
         assertThat(result.isValid()).isFalse();
         assertThat(result.getErrors()).hasSize(1);
-        assertThat(result.getErrors().get(0)).contains("POM file does not exist");
+        assertThat(result.getErrors().get(0).getMessage()).contains("POM file does not exist");
     }
     
     @Test
@@ -36,7 +36,7 @@ class PomValidationServiceTest {
         
         assertThat(result.isValid()).isFalse();
         assertThat(result.getErrors()).hasSize(1);
-        assertThat(result.getErrors().get(0)).contains("Path is not a regular file");
+        assertThat(result.getErrors().get(0).getMessage()).contains("Path is not a regular file");
     }
     
     @Test

@@ -1,6 +1,7 @@
 package com.catalis.tools.pomvalidator.validator;
 
 import com.catalis.tools.pomvalidator.model.ValidationResult;
+import com.catalis.tools.pomvalidator.model.ValidationIssue;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
@@ -33,7 +34,7 @@ public class PluginValidator implements PomValidator {
         
         Build build = model.getBuild();
         if (build == null) {
-            result.info("No build section defined");
+        result.info(ValidationIssue.of("No build section defined"));
             return result.build();
         }
         
@@ -62,7 +63,7 @@ public class PluginValidator implements PomValidator {
         int managedCount = pluginMgmt != null && pluginMgmt.getPlugins() != null ? 
             pluginMgmt.getPlugins().size() : 0;
         
-        result.info("Plugins: " + directCount + " direct, " + managedCount + " managed");
+        result.info(ValidationIssue.of("Plugins: " + directCount + " direct, " + managedCount + " managed"));
         
         return result.build();
     }
@@ -77,7 +78,7 @@ public class PluginValidator implements PomValidator {
         
         for (Map.Entry<String, List<Plugin>> entry : groupedPlugins.entrySet()) {
             if (entry.getValue().size() > 1) {
-                result.error("Duplicate " + type + " plugin: " + entry.getKey());
+                result.error(ValidationIssue.of("Duplicate " + type + " plugin: " + entry.getKey(), "Remove duplicate plugin declarations"));
             }
         }
         
@@ -94,7 +95,7 @@ public class PluginValidator implements PomValidator {
         
         // Check for missing artifactId
         if (isBlank(plugin.getArtifactId())) {
-            result.error("Missing artifactId in " + type + " plugin: " + coords);
+            result.error(ValidationIssue.of("Missing artifactId in " + type + " plugin: " + coords, "Add <artifactId>plugin-name</artifactId>"));
         }
         
         // Check version
@@ -102,12 +103,12 @@ public class PluginValidator implements PomValidator {
         if (!isBlank(version)) {
             // Check for SNAPSHOT versions
             if (version.endsWith("-SNAPSHOT")) {
-                result.warning("SNAPSHOT plugin version in " + type + ": " + coords + ":" + version);
+                result.warning(ValidationIssue.of("SNAPSHOT plugin version in " + type + ": " + coords + ":" + version, "Use stable release versions"));
             }
             
             // Check for deprecated version keywords
             if ("LATEST".equals(version) || "RELEASE".equals(version)) {
-                result.error("Deprecated version keyword in " + type + " plugin: " + coords + ":" + version);
+                result.error(ValidationIssue.of("Deprecated version keyword in " + type + " plugin: " + coords + ":" + version, "Use specific version number"));
             }
         }
         
@@ -123,7 +124,7 @@ public class PluginValidator implements PomValidator {
             for (Plugin plugin : plugins) {
                 String artifactId = plugin.getArtifactId();
                 if (CORE_MAVEN_PLUGINS.contains(artifactId) && isBlank(plugin.getVersion())) {
-                    result.warning("Core Maven plugin without version: " + getPluginCoords(plugin));
+                    result.warning(ValidationIssue.of("Core Maven plugin without version: " + getPluginCoords(plugin), "Add version or use pluginManagement"));
                 }
             }
             return;
@@ -138,11 +139,11 @@ public class PluginValidator implements PomValidator {
             
             if (isBlank(plugin.getVersion())) {
                 if (!managedPlugins.contains(coords)) {
-                    result.warning("Direct plugin without version and not in plugin management: " + coords);
+                    result.warning(ValidationIssue.of("Direct plugin without version and not in plugin management: " + coords, "Add version or define in pluginManagement"));
                 }
             } else {
                 if (managedPlugins.contains(coords)) {
-                    result.warning("Direct plugin specifies version but is managed: " + coords);
+                    result.warning(ValidationIssue.of("Direct plugin specifies version but is managed: " + coords, "Remove version to use managed version"));
                 }
             }
         }
@@ -160,12 +161,12 @@ public class PluginValidator implements PomValidator {
         
         // Check for compiler plugin (essential for Java projects)
         if (!pluginArtifacts.contains("maven-compiler-plugin")) {
-            result.warning("Consider explicitly configuring maven-compiler-plugin");
+            result.warning(ValidationIssue.of("Consider explicitly configuring maven-compiler-plugin", "Add maven-compiler-plugin with Java version"));
         }
         
         // Check for surefire plugin (for testing)
         if (!pluginArtifacts.contains("maven-surefire-plugin")) {
-            result.info("Consider configuring maven-surefire-plugin for test execution");
+            result.info(ValidationIssue.of("Consider configuring maven-surefire-plugin for test execution"));
         }
     }
     
@@ -178,16 +179,16 @@ public class PluginValidator implements PomValidator {
         if ("maven-compiler-plugin".equals(artifactId)) {
             // This would require parsing the configuration, which is complex
             // For now, just note that it's present
-            result.info("Maven compiler plugin configured");
+            result.info(ValidationIssue.of("Maven compiler plugin configured"));
         }
         
         // Check for outdated plugins
         if ("cobertura-maven-plugin".equals(artifactId)) {
-            result.warning("Cobertura plugin is deprecated, consider JaCoCo instead: " + getPluginCoords(plugin));
+            result.warning(ValidationIssue.of("Cobertura plugin is deprecated, consider JaCoCo instead: " + getPluginCoords(plugin), "Replace with org.jacoco:jacoco-maven-plugin"));
         }
         
         if ("findbugs-maven-plugin".equals(artifactId)) {
-            result.warning("FindBugs plugin is deprecated, consider SpotBugs instead: " + getPluginCoords(plugin));
+            result.warning(ValidationIssue.of("FindBugs plugin is deprecated, consider SpotBugs instead: " + getPluginCoords(plugin), "Replace with com.github.spotbugs:spotbugs-maven-plugin"));
         }
     }
     

@@ -7,20 +7,20 @@ import lombok.Singular;
 import java.util.List;
 
 /**
- * Represents the result of POM validation containing errors, warnings, and informational messages.
+ * Represents the result of POM validation containing errors, warnings, informational messages, and suggestions.
  */
 @Data
 @Builder
 public class ValidationResult {
     
     @Singular
-    private final List<String> errors;
+    private final List<ValidationIssue> errors;
     
     @Singular
-    private final List<String> warnings;
+    private final List<ValidationIssue> warnings;
     
     @Singular
-    private final List<String> infos;
+    private final List<ValidationIssue> infos;
     
     /**
      * Returns true if the validation passed (no errors).

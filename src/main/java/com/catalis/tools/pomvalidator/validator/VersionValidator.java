@@ -1,6 +1,7 @@
 package com.catalis.tools.pomvalidator.validator;
 
 import com.catalis.tools.pomvalidator.model.ValidationResult;
+import com.catalis.tools.pomvalidator.model.ValidationIssue;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 

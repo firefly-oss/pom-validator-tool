@@ -1,12 +1,9 @@
 com/catalis/tools/pomvalidator/validator/DependencyValidator.class
-com/catalis/tools/pomvalidator/validator/BestPracticesValidator.class
-com/catalis/tools/pomvalidator/service/PomValidationService.class
+com/catalis/tools/pomvalidator/model/ValidationIssue.class
+com/catalis/tools/pomvalidator/model/ValidationIssue$ValidationIssueBuilder.class
 com/catalis/tools/pomvalidator/validator/BasicStructureValidator.class
-com/catalis/tools/pomvalidator/util/PomParser.class
 com/catalis/tools/pomvalidator/PomValidatorApplication.class
-com/catalis/tools/pomvalidator/validator/VersionValidator.class
 com/catalis/tools/pomvalidator/validator/PomValidator.class
 com/catalis/tools/pomvalidator/model/ValidationResult$ValidationResultBuilder.class
-com/catalis/tools/pomvalidator/validator/PropertyValidator.class
 com/catalis/tools/pomvalidator/validator/PluginValidator.class
 com/catalis/tools/pomvalidator/model/ValidationResult.class

@@ -33,19 +33,34 @@ public class PomValidatorApplication {
             
             if (!result.getErrors().isEmpty()) {
                 System.out.println("ERRORS:");
-                result.getErrors().forEach(error -> System.out.println("  ❌ " + error));
+                result.getErrors().forEach(error -> {
+                    System.out.println("  ❌ " + error.getMessage());
+                    if (error.hasSuggestion()) {
+                        System.out.println("     💡 Fix: " + error.getSuggestion());
+                    }
+                });
                 System.out.println();
             }
             
             if (!result.getWarnings().isEmpty()) {
                 System.out.println("WARNINGS:");
-                result.getWarnings().forEach(warning -> System.out.println("  ⚠️  " + warning));
+                result.getWarnings().forEach(warning -> {
+                    System.out.println("  ⚠️  " + warning.getMessage());
+                    if (warning.hasSuggestion()) {
+                        System.out.println("     💡 Suggestion: " + warning.getSuggestion());
+                    }
+                });
                 System.out.println();
             }
             
             if (!result.getInfos().isEmpty()) {
                 System.out.println("INFO:");
-                result.getInfos().forEach(info -> System.out.println("  ℹ️  " + info));
+                result.getInfos().forEach(info -> {
+                    System.out.println("  ℹ️  " + info.getMessage());
+                    if (info.hasSuggestion()) {
+                        System.out.println("     💡 Tip: " + info.getSuggestion());
+                    }
+                });
                 System.out.println();
             }
             

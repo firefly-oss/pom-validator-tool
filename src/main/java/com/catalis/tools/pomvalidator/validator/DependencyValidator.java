@@ -1,6 +1,7 @@
 package com.catalis.tools.pomvalidator.validator;
 
 import com.catalis.tools.pomvalidator.model.ValidationResult;
+import com.catalis.tools.pomvalidator.model.ValidationIssue;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -40,7 +41,7 @@ public class DependencyValidator implements PomValidator {
         int managedCount = depMgmt != null && depMgmt.getDependencies() != null ? 
             depMgmt.getDependencies().size() : 0;
         
-        result.info("Dependencies: " + directCount + " direct, " + managedCount + " managed");
+        result.info(ValidationIssue.of("Dependencies: " + directCount + " direct, " + managedCount + " managed"));
         
         return result.build();
     }
@@ -54,14 +55,20 @@ public class DependencyValidator implements PomValidator {
         
         for (Map.Entry<String, List<Dependency>> entry : groupedDeps.entrySet()) {
             if (entry.getValue().size() > 1) {
-                result.error("Duplicate " + type + " dependency: " + entry.getKey());
+                result.error(ValidationIssue.of(
+                    "Duplicate " + type + " dependency: " + entry.getKey(),
+                    "Remove duplicate dependency declarations, keep only one version"
+                ));
                 // List all versions if they differ
                 Set<String> versions = entry.getValue().stream()
                     .map(Dependency::getVersion)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
                 if (versions.size() > 1) {
-                    result.error("Version conflict for " + entry.getKey() + ": " + versions);
+                    result.error(ValidationIssue.of(
+                        "Version conflict for " + entry.getKey() + ": " + versions,
+                        "Choose one version and remove others, or use dependencyManagement to control versions"
+                    ));
                 }
             }
         }
@@ -79,11 +86,17 @@ public class DependencyValidator implements PomValidator {
         
         // Check for missing groupId or artifactId
         if (isBlank(dep.getGroupId())) {
-            result.error("Missing groupId in " + type + " dependency: " + coords);
+            result.error(ValidationIssue.of(
+                "Missing groupId in " + type + " dependency: " + coords,
+                "Add <groupId>org.example</groupId> element to the dependency"
+            ));
         }
         
         if (isBlank(dep.getArtifactId())) {
-            result.error("Missing artifactId in " + type + " dependency: " + coords);
+            result.error(ValidationIssue.of(
+                "Missing artifactId in " + type + " dependency: " + coords,
+                "Add <artifactId>library-name</artifactId> element to the dependency"
+            ));
         }
         
         // Check for version-related issues
@@ -91,24 +104,36 @@ public class DependencyValidator implements PomValidator {
         if (!isBlank(version)) {
             // Check for SNAPSHOT versions in non-SNAPSHOT projects
             if (version.endsWith("-SNAPSHOT")) {
-                result.warning("SNAPSHOT dependency in " + type + ": " + coords + ":" + version);
+                result.warning(ValidationIssue.of(
+                    "SNAPSHOT dependency in " + type + ": " + coords + ":" + version,
+                    "Use stable release versions in production, SNAPSHOT versions are for development only"
+                ));
             }
             
             // Check for version ranges (generally discouraged)
             if (version.contains("[") || version.contains("(") || version.contains(",")) {
-                result.warning("Version range in " + type + " dependency: " + coords + ":" + version);
+                result.warning(ValidationIssue.of(
+                    "Version range in " + type + " dependency: " + coords + ":" + version,
+                    "Specify exact version numbers for reproducible builds: <version>1.2.3</version>"
+                ));
             }
             
             // Check for LATEST or RELEASE versions (deprecated)
             if ("LATEST".equals(version) || "RELEASE".equals(version)) {
-                result.error("Deprecated version keyword in " + type + " dependency: " + coords + ":" + version);
+                result.error(ValidationIssue.of(
+                    "Deprecated version keyword in " + type + " dependency: " + coords + ":" + version,
+                    "Replace with specific version number: <version>1.2.3</version>"
+                ));
             }
         }
         
         // Check scope
         String scope = dep.getScope();
         if (scope != null && !isValidScope(scope)) {
-            result.warning("Invalid scope in " + type + " dependency " + coords + ": " + scope);
+            result.warning(ValidationIssue.of(
+                "Invalid scope in " + type + " dependency " + coords + ": " + scope,
+                "Use valid scopes: compile, provided, runtime, test, system, or import"
+            ));
         }
         
         // Check for common problematic dependencies
@@ -131,11 +156,17 @@ public class DependencyValidator implements PomValidator {
             
             if (isBlank(dep.getVersion())) {
                 if (!managedDeps.contains(coords)) {
-                    result.error("Direct dependency without version and not in dependency management: " + coords);
+                    result.error(ValidationIssue.of(
+                        "Direct dependency without version and not in dependency management: " + coords,
+                        "Add <version>1.2.3</version> or define in <dependencyManagement> section"
+                    ));
                 }
             } else {
                 if (managedDeps.contains(coords)) {
-                    result.warning("Direct dependency specifies version but is managed: " + coords);
+                    result.warning(ValidationIssue.of(
+                        "Direct dependency specifies version but is managed: " + coords,
+                        "Remove <version> tag from dependency to use managed version"
+                    ));
                 }
             }
         }
@@ -148,17 +179,26 @@ public class DependencyValidator implements PomValidator {
         
         // Check for common issues
         if ("commons-logging:commons-logging".equals(coords)) {
-            result.warning("Consider using SLF4J instead of commons-logging: " + coords);
+            result.warning(ValidationIssue.of(
+                "Consider using SLF4J instead of commons-logging: " + coords,
+                "Replace with org.slf4j:slf4j-api and appropriate implementation"
+            ));
         }
         
         if ("log4j:log4j".equals(coords) && 
             (dep.getVersion() == null || dep.getVersion().startsWith("1."))) {
-            result.warning("Log4j 1.x is end-of-life, consider upgrading: " + coords);
+            result.warning(ValidationIssue.of(
+                "Log4j 1.x is end-of-life, consider upgrading: " + coords,
+                "Upgrade to org.apache.logging.log4j:log4j-core version 2.x"
+            ));
         }
         
         // Check for test dependencies in non-test scope
         if (isTestDependency(coords) && !"test".equals(dep.getScope())) {
-            result.warning("Test framework should have test scope: " + coords);
+            result.warning(ValidationIssue.of(
+                "Test framework should have test scope: " + coords,
+                "Add <scope>test</scope> to this dependency"
+            ));
         }
     }
     

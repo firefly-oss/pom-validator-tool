@@ -1,6 +1,7 @@
 package com.catalis.tools.pomvalidator.validator;
 
 import com.catalis.tools.pomvalidator.model.ValidationResult;
+import com.catalis.tools.pomvalidator.model.ValidationIssue;
 import org.apache.maven.model.Model;
 
 import java.nio.file.Path;
@@ -16,26 +17,41 @@ public class BasicStructureValidator implements PomValidator {
         
         // Check model version
         if (!"4.0.0".equals(model.getModelVersion())) {
-            result.error("Model version must be 4.0.0, found: " + model.getModelVersion());
+            result.error(ValidationIssue.of(
+                "Model version must be 4.0.0, found: " + model.getModelVersion(),
+                "Update <modelVersion>4.0.0</modelVersion> in your POM"
+            ));
         }
         
         // Check required GAV coordinates
         if (isBlank(model.getGroupId())) {
-            result.error("GroupId is missing");
+            result.error(ValidationIssue.of(
+                "GroupId is missing",
+                "Add <groupId>com.example</groupId> element to identify your organization/project"
+            ));
         }
         
         if (isBlank(model.getArtifactId())) {
-            result.error("ArtifactId is missing");
+            result.error(ValidationIssue.of(
+                "ArtifactId is missing",
+                "Add <artifactId>your-project-name</artifactId> element to identify your project"
+            ));
         }
         
         if (isBlank(model.getVersion())) {
-            result.error("Version is missing");
+            result.error(ValidationIssue.of(
+                "Version is missing",
+                "Add <version>1.0.0-SNAPSHOT</version> or inherit from parent POM"
+            ));
         }
         
         // Check packaging (default is jar if not specified)
         String packaging = model.getPackaging();
         if (packaging != null && !isValidPackaging(packaging)) {
-            result.warning("Unknown packaging type: " + packaging);
+            result.warning(ValidationIssue.of(
+                "Unknown packaging type: " + packaging,
+                "Use standard packaging types: pom, jar, war, ear, maven-plugin, rar, or bundle"
+            ));
         }
         
         // Check for required elements in parent POM
@@ -43,14 +59,17 @@ public class BasicStructureValidator implements PomValidator {
             if (model.getModules() == null || model.getModules().isEmpty()) {
                 if (model.getDependencyManagement() == null && 
                     (model.getBuild() == null || model.getBuild().getPluginManagement() == null)) {
-                    result.warning("POM packaging without modules should typically have dependency or plugin management");
+                    result.warning(ValidationIssue.of(
+                        "POM packaging without modules should typically have dependency or plugin management",
+                        "Add <dependencyManagement> or <pluginManagement> sections, or define <modules>"
+                    ));
                 }
             }
         }
         
         // Info about the project
-        result.info("GAV: " + model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion());
-        result.info("Packaging: " + (packaging != null ? packaging : "jar (default)"));
+        result.info(ValidationIssue.of("GAV: " + model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion()));
+        result.info(ValidationIssue.of("Packaging: " + (packaging != null ? packaging : "jar (default)")));
         
         return result.build();
     }
