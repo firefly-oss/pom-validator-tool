@@ -1,6 +1,24 @@
 # POM Validator Tool
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Firefly%20Platform-Toolset-orange?style=for-the-badge&logo=fire" alt="Firefly Platform Toolset">
+  <img src="https://img.shields.io/badge/Java-21-blue?style=for-the-badge&logo=openjdk" alt="Java 21">
+  <img src="https://img.shields.io/badge/Maven-3.6+-red?style=for-the-badge&logo=apache-maven" alt="Maven 3.6+">
+  <img src="https://img.shields.io/badge/License-Apache%202.0-green?style=for-the-badge" alt="Apache 2.0 License">
+</p>
+
+> **Part of the [Firefly Platform Toolset](https://github.com/firefly-oss)** - A collection of enterprise-grade tools for modern Java development and microservices architecture.
+
 A comprehensive Java 21 tool for validating Maven POM files, checking for structure issues, dependency problems, version conflicts, and best practices violations. The tool provides actionable suggestions for fixing detected issues.
+
+## 🔥 Firefly Platform Integration
+
+This tool is designed to integrate seamlessly with the Firefly Platform ecosystem:
+
+- **🏗️ Build Pipeline Integration**: Works with Firefly CI/CD templates
+- **📊 Quality Gates**: Enforces Maven best practices across Firefly projects
+- **🔧 Developer Tools**: Part of the Firefly developer experience toolkit
+- **🚀 Microservices Ready**: Optimized for Firefly microservice architectures
 
 ## Features
 
@@ -517,8 +535,35 @@ To add new validators:
 3. Register the validator in `PomValidationService`
 4. Add comprehensive unit tests
 
+## 🔥 Firefly Platform
+
+This tool is part of the **Firefly Platform Toolset**, an enterprise-grade collection of tools designed for modern Java development and microservices architecture.
+
+### Other Firefly Tools
+
+Explore more tools in the Firefly Platform ecosystem:
+
+- **[Firefly Platform](https://github.com/firefly-oss)** - Main platform repository
+- More tools coming soon...
+
+### Community & Support
+
+- **GitHub Organization**: [firefly-oss](https://github.com/firefly-oss)
+- **Issues & Feature Requests**: [GitHub Issues](https://github.com/firefly-oss/pom-validator-tool/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/firefly-oss/pom-validator-tool/discussions)
+
 ## License
 
 This project is licensed under the Apache License, Version 2.0.
 
 See the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  <strong>🔥 Firefly Platform Toolset</strong><br>
+  <em>Enterprise-grade tools for modern Java development</em><br><br>
+  <a href="https://github.com/firefly-oss">🌟 Explore More Tools</a> |
+  <a href="https://github.com/firefly-oss/pom-validator-tool/issues">🐛 Report Issues</a> |
+  <a href="https://github.com/firefly-oss/pom-validator-tool/discussions">💬 Join Discussions</a>
+</p>
