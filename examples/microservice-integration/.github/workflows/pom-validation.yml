@@ -102,7 +102,7 @@ jobs:
         mvn org.owasp:dependency-check-maven:check
         
     - name: Upload OWASP report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: owasp-report
@@ -145,7 +145,7 @@ jobs:
       run: mvn clean package -DskipTests
       
     - name: Upload JAR artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: application-jar
         path: target/*.jar
@@ -167,7 +167,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Download JAR artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: application-jar
         path: target/

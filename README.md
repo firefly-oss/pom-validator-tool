@@ -75,8 +75,11 @@ mvn compile
 # Run tests
 mvn test
 
-# Build the JAR
+# Build the JAR (creates an executable fat JAR with all dependencies)
 mvn package
+
+# The executable JAR will be created at:
+# target/pom-validator-tool-1.0.0-SNAPSHOT.jar
 ```
 
 ### Prerequisites
