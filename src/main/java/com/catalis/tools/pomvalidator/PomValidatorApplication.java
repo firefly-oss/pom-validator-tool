@@ -1,6 +1,7 @@
 package com.catalis.tools.pomvalidator;
 
 import com.catalis.tools.pomvalidator.cli.CliOptions;
+import com.catalis.tools.pomvalidator.cli.ui.*;
 import com.catalis.tools.pomvalidator.feature.OutputFormatter;
 import com.catalis.tools.pomvalidator.feature.WatchMode;
 import com.catalis.tools.pomvalidator.feature.InteractiveMode;
@@ -46,12 +47,20 @@ public class PomValidatorApplication {
         
         // Handle help and version
         if (options.isHelp()) {
-            app.printEnhancedHelp();
+            new HelpScreen().show();
             System.exit(0);
         }
         
         if (options.isVersion()) {
-            app.printVersion();
+            CliUI ui = new CliUI();
+            ui.printHeader("VERSION INFO", '═');
+            ui.println(ui.bold(ui.cyan("📦 POM Validator Tool")) + " " + ui.green("v1.0.0"));
+            ui.println(ui.gray("Build: 2024.01.release"));
+            ui.println(ui.gray("Java: " + System.getProperty("java.version")));
+            ui.newLine();
+            ui.println(ui.dim("Part of Firefly OpenCore Banking Platform"));
+            ui.println(ui.dim("© 2024 Firefly OpenCore. Apache License 2.0"));
+            ui.printDivider('═');
             System.exit(0);
         }
         
