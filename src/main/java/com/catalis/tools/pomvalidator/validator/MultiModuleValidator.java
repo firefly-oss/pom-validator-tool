@@ -150,19 +150,7 @@ public class MultiModuleValidator implements PomValidator {
             }
         }
         
-        // Check if groupId is inherited
-        if (model.getGroupId() == null && parent.getGroupId() != null) {
-            result.info(ValidationIssue.of(
-                "GroupId inherited from parent: " + parent.getGroupId()
-            ));
-        }
-        
-        // Check if version is inherited
-        if (model.getVersion() == null && parent.getVersion() != null) {
-            result.info(ValidationIssue.of(
-                "Version inherited from parent: " + parent.getVersion()
-            ));
-        }
+        // Note: Inheritance info is now handled by BasicStructureValidator
         
         // Warn about version alignment
         if (model.getVersion() != null && parent.getVersion() != null) {
