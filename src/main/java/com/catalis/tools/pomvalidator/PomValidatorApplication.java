@@ -42,6 +42,12 @@ public class PomValidatorApplication {
     public static void main(String[] args) {
         PomValidatorApplication app = new PomValidatorApplication();
         
+        // Show help if no arguments provided
+        if (args.length == 0) {
+            new HelpScreen().show();
+            System.exit(0);
+        }
+        
         // Parse CLI options
         CliOptions options = CliOptions.parse(args);
         
@@ -52,21 +58,14 @@ public class PomValidatorApplication {
         }
         
         if (options.isVersion()) {
-            CliUI ui = new CliUI();
-            ui.printHeader("VERSION INFO", '═');
-            ui.println(ui.bold(ui.cyan("📦 POM Validator Tool")) + " " + ui.green("v1.0.0"));
-            ui.println(ui.gray("Build: 2024.01.release"));
-            ui.println(ui.gray("Java: " + System.getProperty("java.version")));
-            ui.newLine();
-            ui.println(ui.dim("Part of Firefly OpenCore Banking Platform"));
-            ui.println(ui.dim("© 2024 Firefly OpenCore. Apache License 2.0"));
-            ui.printDivider('═');
+            new VersionScreen().show();
             System.exit(0);
         }
         
         // Handle color output
         if (options.isNoColor()) {
             app.disableColors();
+            CliUI.setColorEnabled(false);
         }
         
         try {
@@ -450,97 +449,113 @@ public class PomValidatorApplication {
     }
     
     private void printValidationResult(Path pomPath, ValidationResult result, Path basePath) {
+        CliUI ui = new CliUI();
         String relativePath = basePath.relativize(pomPath).toString();
         if (relativePath.isEmpty()) {
             relativePath = pomPath.getFileName().toString();
         }
         
-        System.out.println(BOLD + "=== " + relativePath + " ===" + RESET);
-        System.out.println("Status: " + (result.isValid() ? GREEN + "✅ VALID" : RED + "❌ INVALID") + RESET);
+        // File header
+        ui.println(ui.bold("=== " + relativePath + " ==="));
+        ui.println("Status: " + (result.isValid() ? 
+            ui.green("✅ VALID") : 
+            ui.red("❌ INVALID")));
         
+        // Errors
         if (!result.getErrors().isEmpty()) {
-            System.out.println();
-            System.out.println(RED + "ERRORS:" + RESET);
+            ui.newLine();
+            ui.println(ui.red("ERRORS:"));
             result.getErrors().forEach(error -> {
-                System.out.println("  " + RED + "❌ " + error.getMessage() + RESET);
+                ui.println("  " + ui.red("❌ " + error.getMessage()));
                 if (error.hasSuggestion()) {
-                    System.out.println("     💡 Fix: " + error.getSuggestion());
+                    ui.println("     💡 Fix: " + error.getSuggestion());
                 }
             });
         }
         
+        // Warnings
         if (!result.getWarnings().isEmpty()) {
-            System.out.println();
-            System.out.println(YELLOW + "WARNINGS:" + RESET);
+            ui.newLine();
+            ui.println(ui.yellow("WARNINGS:"));
             result.getWarnings().forEach(warning -> {
-                System.out.println("  " + YELLOW + "⚠️  " + warning.getMessage() + RESET);
+                ui.println("  " + ui.yellow("⚠️  " + warning.getMessage()));
                 if (warning.hasSuggestion()) {
-                    System.out.println("     💡 Suggestion: " + warning.getSuggestion());
+                    ui.println("     💡 Suggestion: " + warning.getSuggestion());
                 }
             });
         }
         
+        // Info
         if (!result.getInfos().isEmpty()) {
-            System.out.println();
-            System.out.println(CYAN + "INFO:" + RESET);
+            ui.newLine();
+            ui.println(ui.cyan("INFO:"));
             result.getInfos().forEach(info -> {
-                System.out.println("  " + CYAN + "ℹ️  " + info.getMessage() + RESET);
+                ui.println("  " + ui.cyan("ℹ️  " + info.getMessage()));
                 if (info.hasSuggestion()) {
-                    System.out.println("     💡 Tip: " + info.getSuggestion());
+                    ui.println("     💡 Tip: " + info.getSuggestion());
                 }
             });
         }
         
-        System.out.println();
-        System.out.println("Summary: " + 
-            (result.getErrors().size() > 0 ? RED : "") + result.getErrors().size() + " errors" + RESET + ", " +
-            (result.getWarnings().size() > 0 ? YELLOW : "") + result.getWarnings().size() + " warnings" + RESET + ", " +
-            result.getInfos().size() + " info messages");
-        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        System.out.println();
+        // Summary
+        ui.newLine();
+        String errorCount = result.getErrors().size() > 0 ? 
+            ui.red(String.valueOf(result.getErrors().size())) : 
+            String.valueOf(result.getErrors().size());
+        String warningCount = result.getWarnings().size() > 0 ? 
+            ui.yellow(String.valueOf(result.getWarnings().size())) : 
+            String.valueOf(result.getWarnings().size());
+        
+        ui.println("Summary: " + errorCount + " errors, " + 
+                   warningCount + " warnings, " + 
+                   result.getInfos().size() + " info messages");
+        ui.printDivider('━');
+        ui.newLine();
     }
     
     private void printSummary(Map<Path, ValidationResult> results, int totalErrors, int totalWarnings, int totalInfos) {
-        System.out.println(BOLD + BLUE + "📊 OVERALL SUMMARY" + RESET);
-        System.out.println("═══════════════════════════════════════════════════════════════");
+        CliUI ui = new CliUI();
         
-        System.out.println(BOLD + "Total POMs validated: " + results.size() + RESET);
+        ui.printSection(ui.bold(ui.blue("📊 OVERALL SUMMARY")));
+        ui.printDivider('═');
+        
+        ui.println(ui.bold("Total POMs validated: " + results.size()));
         
         // Count valid vs invalid
         long validCount = results.values().stream().filter(ValidationResult::isValid).count();
         long invalidCount = results.size() - validCount;
         
-        System.out.println(GREEN + "  ✅ Valid: " + validCount + RESET);
+        ui.println(ui.green("  ✅ Valid: " + validCount));
         if (invalidCount > 0) {
-            System.out.println(RED + "  ❌ Invalid: " + invalidCount + RESET);
+            ui.println(ui.red("  ❌ Invalid: " + invalidCount));
         }
         
-        System.out.println();
-        System.out.println(BOLD + "Total issues found:" + RESET);
-        System.out.println("  " + (totalErrors > 0 ? RED : "") + "Errors:   " + totalErrors + RESET);
-        System.out.println("  " + (totalWarnings > 0 ? YELLOW : "") + "Warnings: " + totalWarnings + RESET);
-        System.out.println("  " + CYAN + "Info:     " + totalInfos + RESET);
+        ui.newLine();
+        ui.println(ui.bold("Total issues found:"));
+        ui.println("  " + (totalErrors > 0 ? ui.red("Errors:   " + totalErrors) : "Errors:   " + totalErrors));
+        ui.println("  " + (totalWarnings > 0 ? ui.yellow("Warnings: " + totalWarnings) : "Warnings: " + totalWarnings));
+        ui.println("  " + ui.cyan("Info:     " + totalInfos));
         
         // List POMs with errors
         if (invalidCount > 0) {
-            System.out.println();
-            System.out.println(RED + "POMs with errors:" + RESET);
+            ui.newLine();
+            ui.println(ui.red("POMs with errors:"));
             results.entrySet().stream()
                 .filter(e -> !e.getValue().isValid())
                 .forEach(e -> {
                     Path path = e.getKey();
                     ValidationResult result = e.getValue();
-                    System.out.println("  • " + path.getFileName() + " (" + 
+                    ui.println("  • " + path.getFileName() + " (" + 
                         result.getErrors().size() + " errors, " + 
                         result.getWarnings().size() + " warnings)");
                 });
         }
         
-        System.out.println();
-        System.out.println("═══════════════════════════════════════════════════════════════");
-        System.out.println(totalErrors > 0 ? 
-            RED + BOLD + "❌ VALIDATION FAILED" + RESET + " - Fix errors before proceeding" :
-            GREEN + BOLD + "✅ VALIDATION PASSED" + RESET + " - All POMs are valid");
-        System.out.println();
+        ui.newLine();
+        ui.printDivider('═');
+        ui.println(totalErrors > 0 ? 
+            ui.bold(ui.red("❌ VALIDATION FAILED")) + " - Fix errors before proceeding" :
+            ui.bold(ui.green("✅ VALIDATION PASSED")) + " - All POMs are valid");
+        ui.newLine();
     }
 }

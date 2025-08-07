@@ -53,14 +53,25 @@ public class CliUI {
     private final boolean colorEnabled;
     private final int terminalWidth;
     
+    // Static color control for global disabling
+    private static boolean globalColorEnabled = true;
+    
     public CliUI() {
         this(System.out, true, getTerminalWidth());
     }
     
     public CliUI(PrintStream out, boolean colorEnabled, int terminalWidth) {
         this.out = out;
-        this.colorEnabled = colorEnabled;
+        this.colorEnabled = colorEnabled && globalColorEnabled;
         this.terminalWidth = terminalWidth;
+    }
+    
+    /**
+     * Globally enable or disable colored output.
+     * @param enabled true to enable colors, false to disable
+     */
+    public static void setColorEnabled(boolean enabled) {
+        globalColorEnabled = enabled;
     }
     
     // Color methods
