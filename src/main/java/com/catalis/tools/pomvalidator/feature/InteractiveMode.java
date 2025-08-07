@@ -4,6 +4,8 @@ import com.catalis.tools.pomvalidator.service.PomValidationService;
 import com.catalis.tools.pomvalidator.model.ValidationResult;
 import com.catalis.tools.pomvalidator.model.ValidationIssue;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 
@@ -205,20 +207,50 @@ public class InteractiveMode {
     }
     
     private boolean applyFix(Path pomPath, ValidationIssue issue) {
-        // This is a simplified auto-fix implementation
-        // In a real implementation, you would parse the POM and apply specific fixes
-        
         try {
             String message = issue.getMessage().toLowerCase();
+            String suggestion = issue.hasSuggestion() ? issue.getSuggestion().toLowerCase() : "";
             
-            if (message.contains("missing groupid")) {
+            // Missing GAV coordinates
+            if (message.contains("groupid is missing")) {
                 return addMissingElement(pomPath, "groupId", "com.example");
             } else if (message.contains("missing artifactid")) {
                 return addMissingElement(pomPath, "artifactId", "my-artifact");
             } else if (message.contains("missing version")) {
                 return addMissingElement(pomPath, "version", "1.0.0-SNAPSHOT");
-            } else if (message.contains("encoding")) {
+            }
+            
+            // Properties
+            else if (message.contains("project.build.sourceencoding")) {
                 return setProperty(pomPath, "project.build.sourceEncoding", "UTF-8");
+            } else if (message.contains("project.reporting.outputencoding")) {
+                return setProperty(pomPath, "project.reporting.outputEncoding", "UTF-8");
+            } else if (message.contains("maven.compiler.source")) {
+                String javaVersion = extractJavaVersion(pomPath);
+                return setProperty(pomPath, "maven.compiler.source", javaVersion);
+            } else if (message.contains("maven.compiler.target")) {
+                String javaVersion = extractJavaVersion(pomPath);
+                return setProperty(pomPath, "maven.compiler.target", javaVersion);
+            }
+            
+            // Duplicate dependencies
+            else if (message.contains("duplicate") && message.contains("dependency")) {
+                return removeDuplicateDependency(pomPath, issue);
+            }
+            
+            // Missing dependency version
+            else if (message.contains("dependency") && message.contains("version")) {
+                return fixDependencyVersion(pomPath, issue);
+            }
+            
+            // Test scope
+            else if (message.contains("test scope")) {
+                return addTestScope(pomPath, issue);
+            }
+            
+            // Plugin version
+            else if (message.contains("plugin") && message.contains("without version")) {
+                return addPluginVersion(pomPath, issue);
             }
             
             return false;
@@ -229,7 +261,6 @@ public class InteractiveMode {
     }
     
     private boolean addMissingElement(Path pomPath, String element, String defaultValue) throws Exception {
-        // Simple implementation - would need proper XML handling in production
         MavenXpp3Reader reader = new MavenXpp3Reader();
         Model model;
         
@@ -237,30 +268,36 @@ public class InteractiveMode {
             model = reader.read(fileReader);
         }
         
+        boolean modified = false;
         switch (element) {
             case "groupId":
                 if (model.getGroupId() == null) {
                     model.setGroupId(defaultValue);
+                    modified = true;
                 }
                 break;
             case "artifactId":
                 if (model.getArtifactId() == null) {
                     model.setArtifactId(defaultValue);
+                    modified = true;
                 }
                 break;
             case "version":
                 if (model.getVersion() == null) {
                     model.setVersion(defaultValue);
+                    modified = true;
                 }
                 break;
         }
         
-        MavenXpp3Writer writer = new MavenXpp3Writer();
-        try (FileWriter fileWriter = new FileWriter(pomPath.toFile())) {
-            writer.write(fileWriter, model);
+        if (modified) {
+            MavenXpp3Writer writer = new MavenXpp3Writer();
+            try (FileWriter fileWriter = new FileWriter(pomPath.toFile())) {
+                writer.write(fileWriter, model);
+            }
         }
         
-        return true;
+        return modified;
     }
     
     private boolean setProperty(Path pomPath, String property, String value) throws Exception {
@@ -342,5 +379,150 @@ public class InteractiveMode {
     private void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
+    }
+    
+    // Additional helper methods for auto-fix functionality
+    
+    private String extractJavaVersion(Path pomPath) throws Exception {
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        Model model;
+        
+        try (FileReader fileReader = new FileReader(pomPath.toFile())) {
+            model = reader.read(fileReader);
+        }
+        
+        // Check if java.version property exists
+        if (model.getProperties() != null && model.getProperties().getProperty("java.version") != null) {
+            return model.getProperties().getProperty("java.version");
+        }
+        
+        // Default to Java 21
+        return "21";
+    }
+    
+    private boolean removeDuplicateDependency(Path pomPath, ValidationIssue issue) throws Exception {
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        Model model;
+        
+        try (FileReader fileReader = new FileReader(pomPath.toFile())) {
+            model = reader.read(fileReader);
+        }
+        
+        // Extract dependency info from the issue message
+        String message = issue.getMessage();
+        String[] parts = message.split(":");
+        if (parts.length < 2) return false;
+        
+        String artifactInfo = parts[1].trim();
+        String[] gavParts = artifactInfo.split(":");
+        if (gavParts.length < 2) return false;
+        
+        String groupId = gavParts[0];
+        String artifactId = gavParts[1];
+        
+        // Find and remove duplicates, keeping the first one
+        List<Dependency> dependencies = model.getDependencies();
+        if (dependencies != null) {
+            Set<String> seen = new HashSet<>();
+            List<Dependency> filtered = new ArrayList<>();
+            
+            for (Dependency dep : dependencies) {
+                String key = dep.getGroupId() + ":" + dep.getArtifactId();
+                if (!seen.contains(key)) {
+                    seen.add(key);
+                    filtered.add(dep);
+                }
+            }
+            
+            if (filtered.size() < dependencies.size()) {
+                model.setDependencies(filtered);
+                
+                MavenXpp3Writer writer = new MavenXpp3Writer();
+                try (FileWriter fileWriter = new FileWriter(pomPath.toFile())) {
+                    writer.write(fileWriter, model);
+                }
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    private boolean fixDependencyVersion(Path pomPath, ValidationIssue issue) throws Exception {
+        // This would need more sophisticated parsing to identify the specific dependency
+        // For now, return false to indicate manual fix is needed
+        return false;
+    }
+    
+    private boolean addTestScope(Path pomPath, ValidationIssue issue) throws Exception {
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        Model model;
+        
+        try (FileReader fileReader = new FileReader(pomPath.toFile())) {
+            model = reader.read(fileReader);
+        }
+        
+        // Extract dependency name from issue
+        String message = issue.getMessage();
+        String[] parts = message.split(":");
+        if (parts.length < 3) return false;
+        
+        String groupId = parts[1].trim();
+        String artifactId = parts[2].trim();
+        
+        // Find the dependency and add test scope
+        List<Dependency> dependencies = model.getDependencies();
+        if (dependencies != null) {
+            for (Dependency dep : dependencies) {
+                if (groupId.equals(dep.getGroupId()) && artifactId.equals(dep.getArtifactId())) {
+                    if (dep.getScope() == null || !dep.getScope().equals("test")) {
+                        dep.setScope("test");
+                        
+                        MavenXpp3Writer writer = new MavenXpp3Writer();
+                        try (FileWriter fileWriter = new FileWriter(pomPath.toFile())) {
+                            writer.write(fileWriter, model);
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    private boolean addPluginVersion(Path pomPath, ValidationIssue issue) throws Exception {
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        Model model;
+        
+        try (FileReader fileReader = new FileReader(pomPath.toFile())) {
+            model = reader.read(fileReader);
+        }
+        
+        // Extract plugin name from issue
+        String message = issue.getMessage();
+        if (!message.contains("maven-compiler-plugin")) {
+            return false; // Only handle compiler plugin for now
+        }
+        
+        // Add version to maven-compiler-plugin
+        if (model.getBuild() != null && model.getBuild().getPlugins() != null) {
+            for (Plugin plugin : model.getBuild().getPlugins()) {
+                if ("org.apache.maven.plugins".equals(plugin.getGroupId()) && 
+                    "maven-compiler-plugin".equals(plugin.getArtifactId())) {
+                    if (plugin.getVersion() == null) {
+                        plugin.setVersion("3.11.0");
+                        
+                        MavenXpp3Writer writer = new MavenXpp3Writer();
+                        try (FileWriter fileWriter = new FileWriter(pomPath.toFile())) {
+                            writer.write(fileWriter, model);
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
     }
 }
