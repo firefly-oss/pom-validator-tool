@@ -38,270 +38,91 @@ This POM Validator Tool is part of the **Firefly Platform Toolset** - a collecti
 - **Recursive Validation**: Validates entire multi-module project hierarchies
 - **Summary Reports**: Aggregated statistics for multi-module projects
 
-## Installation
+## 🚀 Quick Start
 
-### Quick Install (Recommended)
+### Installation
 
 ```bash
-# Download and run the installation script
+# Quick install via script
 curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
 
-# Or with wget
-wget -qO- https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
-```
-
-### Manual Installation
-
-1. **Download the installation script:**
-   ```bash
-   curl -O https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh
-   chmod +x install.sh
-   ```
-
-2. **Run the installer:**
-   ```bash
-   ./install.sh
-   ```
-
-3. **Install from source (requires Maven):**
-   ```bash
-   ./install.sh --source
-   ```
-
-### Manual Build
-
-If you prefer to build manually:
-
-```bash
-# Clone the repository
-git clone https://github.com/firefly-oss/pom-validator-tool.git
-cd pom-validator-tool
-
-# Compile the project
-mvn compile
-
-# Run tests
-mvn test
-
-# Build the JAR (creates an executable fat JAR with all dependencies)
-mvn package
-
-# The executable JAR will be created at:
-# target/pom-validator-tool-1.0.0-SNAPSHOT.jar
-```
-
-### Prerequisites
-
-- Java 21 or higher
-- Maven 3.6+ (only for building from source)
-- curl or wget (for installation script)
-
-## Usage
-
-### Command Line
-
-After installation, use the `pom-validator` command:
-
-```bash
-# Show help and usage information
-pom-validator --help
-pom-validator -h
-
-# Validate current directory's pom.xml
-pom-validator
-pom-validator .
-
-# Validate a specific POM file
-pom-validator /path/to/pom.xml
-
-# Validate a multi-module project (all modules)
-pom-validator --recursive /path/to/project
-pom-validator -r .
-
-# Show only summary for multi-module validation
-pom-validator -r -s /path/to/project
-
-# Show version information
+# Verify installation
 pom-validator --version
 ```
 
-### Command Line Options
+**Requirements:** Java 21+
 
-#### Basic Options
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--help` | `-h` | Show comprehensive help message with examples |
-| `--version` | `-v` | Show version information |
-| `--recursive` | `-r` | Validate all POM files recursively in multi-module projects |
-| `--summary` | `-s` | Show only summary (no detailed messages) |
+📖 **[Full Installation Guide](docs/INSTALLATION.md)** - Detailed instructions for all platforms
 
-#### Advanced Modes
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--watch` | `-w` | Watch mode - continuously monitor POM files for changes |
-| `--interactive` | `-i` | Interactive mode - fix issues with guided assistance |
-| `--auto-fix` | `-f` | Automatically fix common issues (coming soon) |
-
-#### Output Options
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--output <format>` | `-o` | Output format: `console`, `json`, `markdown`, `xml`, `html`, `junit` |
-| `--output-file <path>` | `-O` | Write output to specified file |
-| `--quiet` | `-q` | Suppress all output |
-| `--verbose` | `-V` | Show detailed output |
-| `--no-color` | | Disable colored output |
-
-#### Filtering Options
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--severity <level>` | `-S` | Minimum severity level: `error`, `warning`, `info`, `all` |
-| `--profile <name>` | `-p` | Validation profile: `strict`, `standard`, `minimal` |
-| `--exclude <pattern>` | `-e` | Exclude files matching pattern |
-| `--include <pattern>` | `-I` | Include only files matching pattern |
-| `--fail-fast` | | Stop validation on first error |
-
-#### Configuration
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--config <file>` | `-c` | Use configuration file |
-| `-D<prop>=<value>` | | Set a property value |
-
-### Direct JAR Usage
-
-If you built manually or want to use the JAR directly:
+### Basic Usage
 
 ```bash
-# Run validation on a POM file
-java -jar target/pom-validator-tool-1.0.0-SNAPSHOT.jar /path/to/pom.xml
+# Validate current project
+pom-validator
 
-# Example with Maven exec plugin
-mvn exec:java -Dexec.mainClass="com.catalis.tools.pomvalidator.PomValidatorApplication" \
-  -Dexec.args="/path/to/pom.xml"
+# Watch for changes
+pom-validator --watch .
+
+# Fix issues interactively
+pom-validator --interactive pom.xml
+
+# Auto-fix common issues
+pom-validator --auto-fix pom.xml
+
+# Generate JSON report
+pom-validator -o json -O report.json .
 ```
 
-### Exit Codes
+## 📚 Documentation
 
-- `0`: POM is valid (no errors found)
-- `1`: POM has errors or validation failed
+- **[📖 Complete Tutorial](docs/TUTORIAL.md)** - Step-by-step guide with examples
+- **[⚡ Quick Reference](docs/QUICK_REFERENCE.md)** - All commands at a glance
+- **[🎯 Features Guide](docs/FEATURES.md)** - Detailed feature documentation
+- **[🔧 Installation Guide](docs/INSTALLATION.md)** - Platform-specific instructions
+- **[💻 API Documentation](docs/API.md)** - For programmatic usage
 
-### Output
+## ✨ Key Features
 
-The tool provides three types of feedback with actionable suggestions:
+### 🔍 Comprehensive Validation
+- **Structure**: GAV coordinates, packaging, parent POMs
+- **Dependencies**: Duplicates, conflicts, version management
+- **Properties**: Encoding, Java version, compiler settings
+- **Plugins**: Versions, deprecated plugins, duplicates
+- **Multi-Module**: Parent-child relationships, module references
+- **Best Practices**: Security, naming conventions, anti-patterns
 
-- **❌ ERRORS**: Critical issues that make the POM invalid
-  - 💡 **Fix**: Specific instructions for resolving the error
-- **⚠️ WARNINGS**: Issues that should be addressed but don't break functionality
-  - 💡 **Suggestion**: Recommended actions for improvement
-- **ℹ️ INFO**: Informational messages and tips
-  - 💡 **Tip**: Additional guidance when applicable
+### 🛠️ Advanced Modes
+- **🔧 Interactive Mode** - Fix issues with guided assistance
+- **⚡ Auto-Fix Mode** - Automatically fix common problems
+- **👁️ Watch Mode** - Real-time monitoring during development
+- **📊 Multiple Outputs** - JSON, Markdown, XML, HTML, JUnit
 
-## Validation Categories
+### 🎯 Smart Features
+- **Actionable Suggestions** - Every issue comes with a fix
+- **Severity Filtering** - Focus on what matters
+- **Validation Profiles** - Strict, standard, or minimal
+- **CI/CD Ready** - Exit codes, quiet mode, fail-fast
 
-### Basic Structure
-- Model version compliance (4.0.0)
-- Required GAV coordinates (groupId, artifactId, version)
-- Valid packaging types
-- Parent POM structure validation
 
-### Dependencies
-- Duplicate dependency detection
-- Version conflict identification
-- SNAPSHOT dependency warnings
-- Deprecated version keywords (LATEST, RELEASE)
-- Scope validation
-- Version management consistency
+## 💡 Example Output
 
-### Properties
-- Standard Maven properties presence
-- Encoding consistency (UTF-8 recommended)
-- Java version alignment
-- Compiler source/target consistency
+```bash
+$ pom-validator
 
-### Plugins
-- Plugin version management
-- Core Maven plugin configuration
-- Deprecated plugin detection
-- Plugin duplication checks
-
-### Versions
-- Semantic versioning compliance
-- Version format validation
-- SNAPSHOT consistency
-- Parent/project version alignment
-
-### Multi-Module Projects
-- Parent POM validation (packaging type, module references)
-- Child POM validation (parent references, relative paths)
-- Module directory existence checks
-- Version inheritance validation
-- Dependency management inheritance
-
-### Best Practices
-- Project metadata completeness
-- Repository security checks (HTTP vs HTTPS)
-- Naming convention compliance
-- Anti-pattern detection
-
-## Example Output
-
-The tool provides detailed feedback with suggestions:
-
-```
-=== POM Validation Results ===
-File: /path/to/pom.xml
-Status: INVALID
+=== pom.xml ===
+Status: ❌ INVALID
 
 ERRORS:
   ❌ Missing groupId
-     💡 Fix: Add <groupId>com.example</groupId> element to identify your organization/project
+     💡 Fix: Add <groupId>com.example</groupId> element
 
 WARNINGS:
-  ⚠️  Java version and compiler source mismatch: 21 vs ${java.version}
-     💡 Suggestion: Set <maven.compiler.source>${java.version}</maven.compiler.source>
+  ⚠️  Missing recommended property: project.build.sourceEncoding
+     💡 Suggestion: Add <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-INFO:
-  ℹ️  GAV: com.example:my-project:1.0.0-SNAPSHOT
-     💡 Tip: Consider using semantic versioning for releases
-
-Summary: 1 errors, 1 warnings, 1 info messages
+Summary: 1 errors, 1 warnings, 0 info messages
 ```
 
-## Development
-
-### Project Structure
-
-```
-src/
-├── main/java/com/catalis/tools/pomvalidator/
-│   ├── PomValidatorApplication.java      # Main application
-│   ├── model/
-│   │   └── ValidationResult.java        # Result model
-│   ├── service/
-│   │   └── PomValidationService.java    # Main validation orchestrator
-│   ├── util/
-│   │   └── PomParser.java               # POM parsing utility
-│   └── validator/                       # Individual validators
-│       ├── PomValidator.java
-│       ├── BasicStructureValidator.java
-│       ├── DependencyValidator.java
-│       ├── PropertyValidator.java
-│       ├── PluginValidator.java
-│       ├── VersionValidator.java
-│       └── BestPracticesValidator.java
-└── test/java/                           # Unit tests
-```
-
-### Adding New Validators
-
-1. Create a new validator class implementing `PomValidator`
-2. Add validation logic in the `validate` method
-3. Register the validator in `PomValidationService`
-4. Add unit tests
-
-## Requirements
-
-- Java 21
-- Maven 3.6+
 
 ## CI/CD Integration
 
