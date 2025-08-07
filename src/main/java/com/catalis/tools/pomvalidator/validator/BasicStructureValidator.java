@@ -24,11 +24,19 @@ public class BasicStructureValidator implements PomValidator {
         }
         
         // Check required GAV coordinates
+        // GroupId can be inherited from parent in multi-module projects
         if (isBlank(model.getGroupId())) {
-            result.error(ValidationIssue.of(
-                "GroupId is missing",
-                "Add <groupId>com.example</groupId> element to identify your organization/project"
-            ));
+            if (model.getParent() == null || isBlank(model.getParent().getGroupId())) {
+                result.error(ValidationIssue.of(
+                    "GroupId is missing and not inherited from parent",
+                    "Add <groupId>com.example</groupId> element or define it in parent POM"
+                ));
+            } else {
+                // GroupId is inherited from parent - this is valid in multi-module projects
+                result.info(ValidationIssue.of(
+                    "GroupId inherited from parent: " + model.getParent().getGroupId()
+                ));
+            }
         }
         
         if (isBlank(model.getArtifactId())) {
@@ -38,11 +46,19 @@ public class BasicStructureValidator implements PomValidator {
             ));
         }
         
+        // Version can be inherited from parent in multi-module projects
         if (isBlank(model.getVersion())) {
-            result.error(ValidationIssue.of(
-                "Version is missing",
-                "Add <version>1.0.0-SNAPSHOT</version> or inherit from parent POM"
-            ));
+            if (model.getParent() == null || isBlank(model.getParent().getVersion())) {
+                result.error(ValidationIssue.of(
+                    "Version is missing and not inherited from parent",
+                    "Add <version>1.0.0-SNAPSHOT</version> or define it in parent POM"
+                ));
+            } else {
+                // Version is inherited from parent - this is valid in multi-module projects
+                result.info(ValidationIssue.of(
+                    "Version inherited from parent: " + model.getParent().getVersion()
+                ));
+            }
         }
         
         // Check packaging (default is jar if not specified)
@@ -67,8 +83,18 @@ public class BasicStructureValidator implements PomValidator {
             }
         }
         
-        // Info about the project
-        result.info(ValidationIssue.of("GAV: " + model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion()));
+        // Info about the project (showing effective coordinates)
+        String effectiveGroupId = model.getGroupId();
+        if (effectiveGroupId == null && model.getParent() != null) {
+            effectiveGroupId = model.getParent().getGroupId();
+        }
+        
+        String effectiveVersion = model.getVersion();
+        if (effectiveVersion == null && model.getParent() != null) {
+            effectiveVersion = model.getParent().getVersion();
+        }
+        
+        result.info(ValidationIssue.of("GAV: " + effectiveGroupId + ":" + model.getArtifactId() + ":" + effectiveVersion));
         result.info(ValidationIssue.of("Packaging: " + (packaging != null ? packaging : "jar (default)")));
         
         return result.build();
