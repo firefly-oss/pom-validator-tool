@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# POM Validator Tool Installer
+# This script installs the POM Validator Tool on your system
+
 # POM Validator Tool Installation Script
 # This script downloads and installs the POM Validator Tool
 

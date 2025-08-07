@@ -54,6 +54,13 @@ pom-validator --version
 
 📖 **[Full Installation Guide](docs/INSTALLATION.md)** - Detailed instructions for all platforms
 
+### Uninstallation
+
+```bash
+# Easy uninstall
+curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/uninstall.sh | bash
+```
+
 ### Basic Usage
 
 ```bash
