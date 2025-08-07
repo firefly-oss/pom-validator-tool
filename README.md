@@ -57,8 +57,13 @@ pom-validator --version
 ### Uninstallation
 
 ```bash
-# Easy uninstall
-curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/uninstall.sh | bash
+# Download and run (recommended for interactive uninstall)
+curl -O https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/uninstall.sh
+chmod +x uninstall.sh
+./uninstall.sh
+
+# Or force uninstall without confirmation
+curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/uninstall.sh | bash -s -- --force
 ```
 
 ### Basic Usage

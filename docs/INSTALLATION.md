@@ -284,11 +284,16 @@ java -Xmx2g -jar ~/.local/lib/pom-validator-tool.jar "$@"
 ### Using the Uninstall Script (Recommended)
 
 ```bash
-# Download and run the uninstaller
-curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/uninstall.sh | bash
-
-# Or download first to review
+# Download and run interactively (recommended)
 curl -O https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/uninstall.sh
+chmod +x uninstall.sh
+./uninstall.sh
+
+# Or force uninstall without confirmation
+curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/uninstall.sh | bash -s -- --force
+
+# Or with wget
+wget https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/uninstall.sh
 chmod +x uninstall.sh
 ./uninstall.sh
 ```

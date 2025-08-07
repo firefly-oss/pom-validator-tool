@@ -5,6 +5,23 @@
 
 set -e
 
+# Check if we're running from a pipe (curl | bash)
+if [ ! -t 0 ]; then
+    echo "⚠️  Running from a pipe detected. For interactive mode with sudo, please download and run directly:"
+    echo ""
+    echo "  curl -O https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/uninstall.sh"
+    echo "  chmod +x uninstall.sh"
+    echo "  ./uninstall.sh"
+    echo ""
+    echo "Or run with --force flag to skip confirmation:"
+    echo "  curl -fsSL ... | bash -s -- --force"
+    echo ""
+    # If no TTY and no --force flag, exit
+    if [[ ! " $* " =~ " --force " ]] && [[ ! " $* " =~ " -f " ]]; then
+        exit 1
+    fi
+fi
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -39,10 +56,24 @@ check_permissions() {
 remove_file() {
     local file="$1"
     if [ -f "$file" ]; then
-        if [ -w "$file" ]; then
-            rm -f "$file"
+        if [ -w "$file" ] || [ -w "$(dirname "$file")" ]; then
+            rm -f "$file" 2>/dev/null || {
+                echo "Need sudo to remove $file"
+                if command -v sudo &> /dev/null; then
+                    sudo rm -f "$file"
+                else
+                    echo "❌ Cannot remove $file without write permissions"
+                    return 1
+                fi
+            }
         else
-            sudo rm -f "$file"
+            echo "Need sudo to remove $file"
+            if command -v sudo &> /dev/null; then
+                sudo rm -f "$file"
+            else
+                echo "❌ Cannot remove $file without write permissions"
+                return 1
+            fi
         fi
         return 0
     fi
@@ -53,10 +84,24 @@ remove_file() {
 remove_directory() {
     local dir="$1"
     if [ -d "$dir" ]; then
-        if [ -w "$dir" ]; then
-            rm -rf "$dir"
+        if [ -w "$dir" ] || [ -w "$(dirname "$dir")" ]; then
+            rm -rf "$dir" 2>/dev/null || {
+                echo "Need sudo to remove $dir"
+                if command -v sudo &> /dev/null; then
+                    sudo rm -rf "$dir"
+                else
+                    echo "❌ Cannot remove $dir without write permissions"
+                    return 1
+                fi
+            }
         else
-            sudo rm -rf "$dir"
+            echo "Need sudo to remove $dir"
+            if command -v sudo &> /dev/null; then
+                sudo rm -rf "$dir"
+            else
+                echo "❌ Cannot remove $dir without write permissions"
+                return 1
+            fi
         fi
         return 0
     fi
@@ -333,13 +378,20 @@ main() {
     if [ $force -eq 0 ]; then
         print_color "$YELLOW" "⚠️  This will remove POM Validator Tool from your system."
         echo ""
-        read -p "Are you sure you want to continue? (y/N): " -n 1 -r
-        echo ""
-        echo ""
         
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            print_color "$BLUE" "Uninstallation cancelled."
-            exit 0
+        # Check if we can read from terminal
+        if [ -t 0 ]; then
+            read -p "Are you sure you want to continue? (y/N): " -n 1 -r
+            echo ""
+            echo ""
+            
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                print_color "$BLUE" "Uninstallation cancelled."
+                exit 0
+            fi
+        else
+            print_color "$YELLOW" "Running in non-interactive mode. Use --force to skip confirmation."
+            exit 1
         fi
     fi
     
