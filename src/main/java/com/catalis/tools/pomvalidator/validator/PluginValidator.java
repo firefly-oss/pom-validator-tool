@@ -30,7 +30,7 @@ public class PluginValidator implements PomValidator {
     
     @Override
     public ValidationResult validate(Model model, Path pomPath) {
-        ValidationResult.ValidationResultBuilder result = ValidationResult.builder();
+        ValidationResult.Builder result = ValidationResult.builder();
         
         Build build = model.getBuild();
         if (build == null) {
@@ -69,7 +69,7 @@ public class PluginValidator implements PomValidator {
     }
     
     private void validatePlugins(List<Plugin> plugins, 
-                               ValidationResult.ValidationResultBuilder result, 
+                               ValidationResult.Builder result, 
                                String type) {
         // Check for duplicate plugins
         Map<String, List<Plugin>> groupedPlugins = plugins.stream()
@@ -89,7 +89,7 @@ public class PluginValidator implements PomValidator {
     }
     
     private void validateSinglePlugin(Plugin plugin, 
-                                    ValidationResult.ValidationResultBuilder result, 
+                                    ValidationResult.Builder result, 
                                     String type) {
         String coords = getPluginCoords(plugin);
         
@@ -118,7 +118,7 @@ public class PluginValidator implements PomValidator {
     
     private void validateVersionManagement(List<Plugin> plugins, 
                                          PluginManagement pluginMgmt, 
-                                         ValidationResult.ValidationResultBuilder result) {
+                                         ValidationResult.Builder result) {
         if (pluginMgmt == null || pluginMgmt.getPlugins() == null) {
             // Check if core Maven plugins should have versions specified
             for (Plugin plugin : plugins) {
@@ -150,7 +150,7 @@ public class PluginValidator implements PomValidator {
     }
     
     private void checkRecommendedPlugins(List<Plugin> plugins, 
-                                       ValidationResult.ValidationResultBuilder result) {
+                                       ValidationResult.Builder result) {
         if (plugins == null) {
             return;
         }
@@ -171,7 +171,7 @@ public class PluginValidator implements PomValidator {
     }
     
     private void checkSpecificPluginIssues(Plugin plugin, 
-                                         ValidationResult.ValidationResultBuilder result, 
+                                         ValidationResult.Builder result, 
                                          String type) {
         String artifactId = plugin.getArtifactId();
         

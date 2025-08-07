@@ -17,7 +17,7 @@ public class DependencyValidator implements PomValidator {
     
     @Override
     public ValidationResult validate(Model model, Path pomPath) {
-        ValidationResult.ValidationResultBuilder result = ValidationResult.builder();
+        ValidationResult.Builder result = ValidationResult.builder();
         
         // Check direct dependencies
         List<Dependency> dependencies = model.getDependencies();
@@ -47,7 +47,7 @@ public class DependencyValidator implements PomValidator {
     }
     
     private void validateDependencies(List<Dependency> dependencies, 
-                                    ValidationResult.ValidationResultBuilder result, 
+                                    ValidationResult.Builder result, 
                                     String type) {
         // Check for duplicate dependencies
         Map<String, List<Dependency>> groupedDeps = dependencies.stream()
@@ -80,7 +80,7 @@ public class DependencyValidator implements PomValidator {
     }
     
     private void validateSingleDependency(Dependency dep, 
-                                        ValidationResult.ValidationResultBuilder result, 
+                                        ValidationResult.Builder result, 
                                         String type) {
         String coords = dep.getGroupId() + ":" + dep.getArtifactId();
         
@@ -142,7 +142,7 @@ public class DependencyValidator implements PomValidator {
     
     private void validateVersionManagement(List<Dependency> dependencies, 
                                          DependencyManagement depMgmt, 
-                                         ValidationResult.ValidationResultBuilder result) {
+                                         ValidationResult.Builder result) {
         if (depMgmt == null || depMgmt.getDependencies() == null) {
             return;
         }
@@ -173,7 +173,7 @@ public class DependencyValidator implements PomValidator {
     }
     
     private void checkProblematicDependencies(Dependency dep, 
-                                            ValidationResult.ValidationResultBuilder result, 
+                                            ValidationResult.Builder result, 
                                             String type) {
         String coords = dep.getGroupId() + ":" + dep.getArtifactId();
         

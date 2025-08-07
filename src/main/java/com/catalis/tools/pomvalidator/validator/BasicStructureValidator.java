@@ -13,7 +13,7 @@ public class BasicStructureValidator implements PomValidator {
     
     @Override
     public ValidationResult validate(Model model, Path pomPath) {
-        ValidationResult.ValidationResultBuilder result = ValidationResult.builder();
+        ValidationResult.Builder result = ValidationResult.builder();
         
         // Check model version
         if (!"4.0.0".equals(model.getModelVersion())) {

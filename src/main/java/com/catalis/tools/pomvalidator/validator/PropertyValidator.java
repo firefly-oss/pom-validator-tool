@@ -22,7 +22,7 @@ public class PropertyValidator implements PomValidator {
     
     @Override
     public ValidationResult validate(Model model, Path pomPath) {
-        ValidationResult.ValidationResultBuilder result = ValidationResult.builder();
+        ValidationResult.Builder result = ValidationResult.builder();
         
         Properties properties = model.getProperties();
         
@@ -97,7 +97,7 @@ public class PropertyValidator implements PomValidator {
         return result.build();
     }
     
-    private void checkJavaVersion(String javaVersion, ValidationResult.ValidationResultBuilder result) {
+    private void checkJavaVersion(String javaVersion, ValidationResult.Builder result) {
         try {
             int majorVersion = Integer.parseInt(javaVersion);
             if (majorVersion < 11) {
@@ -119,7 +119,7 @@ public class PropertyValidator implements PomValidator {
         }
     }
     
-    private void checkUnusedProperties(Properties properties, ValidationResult.ValidationResultBuilder result) {
+    private void checkUnusedProperties(Properties properties, ValidationResult.Builder result) {
         // This is a simplified check - in a real implementation, you might parse
         // the entire POM content to check for property references
         int potentiallyUnused = 0;

@@ -7,18 +7,23 @@
   <img src="https://img.shields.io/badge/License-Apache%202.0-green?style=for-the-badge" alt="Apache 2.0 License">
 </p>
 
-> **Part of the [Firefly Platform Toolset](https://github.com/firefly-oss)** - A collection of enterprise-grade tools for modern Java development and microservices architecture.
+> **Part of the [Firefly OpenCore Banking Platform](https://github.com/firefly-oss)** - An open-source core banking platform providing enterprise-grade financial services infrastructure and developer tools.
 
 A comprehensive Java 21 tool for validating Maven POM files, checking for structure issues, dependency problems, version conflicts, and best practices violations. The tool provides actionable suggestions for fixing detected issues.
 
-## 🔥 Firefly Platform Integration
+## 🔥 About Firefly OpenCore Banking Platform
 
-This tool is designed to integrate seamlessly with the Firefly Platform ecosystem:
+**Firefly** is an **OpenCore Banking Platform** that provides modern, cloud-native infrastructure for financial services. As part of our commitment to the open-source community, we're releasing a suite of development tools that we use internally to maintain code quality and consistency across our microservices architecture.
 
-- **🏗️ Build Pipeline Integration**: Works with Firefly CI/CD templates
-- **📊 Quality Gates**: Enforces Maven best practices across Firefly projects
-- **🔧 Developer Tools**: Part of the Firefly developer experience toolkit
-- **🚀 Microservices Ready**: Optimized for Firefly microservice architectures
+This POM Validator Tool is part of the **Firefly Platform Toolset** - a collection of enterprise-grade tools we're open-sourcing to help developers build robust, scalable financial applications.
+
+### Platform Integration
+
+- **🏦 Banking Microservices**: Ensures POM consistency across financial service modules
+- **🏗️ CI/CD Pipeline**: Integrates with banking platform build pipelines
+- **📊 Compliance & Quality**: Enforces enterprise standards required in financial services
+- **🔧 Developer Experience**: Streamlines development of banking applications
+- **🚀 Cloud-Native Ready**: Optimized for containerized banking microservices
 
 ## Features
 
@@ -26,9 +31,12 @@ This tool is designed to integrate seamlessly with the Firefly Platform ecosyste
 - **Dependency Analysis**: Detects duplicate dependencies, version conflicts, and problematic dependency patterns
 - **Property Validation**: Ensures standard Maven properties are defined and consistent
 - **Plugin Validation**: Validates plugin configurations and checks for missing versions
+- **Multi-Module Support**: Validates parent-child relationships and module references
 - **Version Validation**: Checks version format compliance and consistency
 - **Best Practices**: Enforces Maven best practices and detects common anti-patterns
 - **Fix Suggestions**: Provides specific, actionable suggestions for resolving each identified issue
+- **Recursive Validation**: Validates entire multi-module project hierarchies
+- **Summary Reports**: Aggregated statistics for multi-module projects
 
 ## Installation
 
@@ -95,15 +103,68 @@ mvn package
 After installation, use the `pom-validator` command:
 
 ```bash
-# Validate a POM file
-pom-validator pom.xml
-
-# Validate POM in another directory
-pom-validator /path/to/other-project/pom.xml
-
-# Show help
+# Show help and usage information
 pom-validator --help
+pom-validator -h
+
+# Validate current directory's pom.xml
+pom-validator
+pom-validator .
+
+# Validate a specific POM file
+pom-validator /path/to/pom.xml
+
+# Validate a multi-module project (all modules)
+pom-validator --recursive /path/to/project
+pom-validator -r .
+
+# Show only summary for multi-module validation
+pom-validator -r -s /path/to/project
+
+# Show version information
+pom-validator --version
 ```
+
+### Command Line Options
+
+#### Basic Options
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--help` | `-h` | Show comprehensive help message with examples |
+| `--version` | `-v` | Show version information |
+| `--recursive` | `-r` | Validate all POM files recursively in multi-module projects |
+| `--summary` | `-s` | Show only summary (no detailed messages) |
+
+#### Advanced Modes
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--watch` | `-w` | Watch mode - continuously monitor POM files for changes |
+| `--interactive` | `-i` | Interactive mode - fix issues with guided assistance |
+| `--auto-fix` | `-f` | Automatically fix common issues (coming soon) |
+
+#### Output Options
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--output <format>` | `-o` | Output format: `console`, `json`, `markdown`, `xml`, `html`, `junit` |
+| `--output-file <path>` | `-O` | Write output to specified file |
+| `--quiet` | `-q` | Suppress all output |
+| `--verbose` | `-V` | Show detailed output |
+| `--no-color` | | Disable colored output |
+
+#### Filtering Options
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--severity <level>` | `-S` | Minimum severity level: `error`, `warning`, `info`, `all` |
+| `--profile <name>` | `-p` | Validation profile: `strict`, `standard`, `minimal` |
+| `--exclude <pattern>` | `-e` | Exclude files matching pattern |
+| `--include <pattern>` | `-I` | Include only files matching pattern |
+| `--fail-fast` | | Stop validation on first error |
+
+#### Configuration
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--config <file>` | `-c` | Use configuration file |
+| `-D<prop>=<value>` | | Set a property value |
 
 ### Direct JAR Usage
 
@@ -167,6 +228,13 @@ The tool provides three types of feedback with actionable suggestions:
 - Version format validation
 - SNAPSHOT consistency
 - Parent/project version alignment
+
+### Multi-Module Projects
+- Parent POM validation (packaging type, module references)
+- Child POM validation (parent references, relative paths)
+- Module directory existence checks
+- Version inheritance validation
+- Dependency management inheritance
 
 ### Best Practices
 - Project metadata completeness
@@ -538,22 +606,47 @@ To add new validators:
 3. Register the validator in `PomValidationService`
 4. Add comprehensive unit tests
 
-## 🔥 Firefly Platform
+## 🏦 Firefly OpenCore Banking Platform
 
-This tool is part of the **Firefly Platform Toolset**, an enterprise-grade collection of tools designed for modern Java development and microservices architecture.
+This tool is part of the **Firefly OpenCore Banking Platform** - an open-source initiative to provide modern, secure, and scalable banking infrastructure.
 
-### Other Firefly Tools
+### Why Open Source?
 
-Explore more tools in the Firefly Platform ecosystem:
+As a fintech platform, we believe in:
+- **Transparency**: Open-source tools build trust in financial services
+- **Community**: Collaborative development improves security and reliability
+- **Innovation**: Shared tools accelerate fintech innovation
+- **Standards**: Common tooling promotes industry best practices
 
-- **[Firefly Platform](https://github.com/firefly-oss)** - Main platform repository
-- More tools coming soon...
+### Firefly Platform Components
+
+#### Core Banking Services (Coming Soon)
+- **Account Management Service**: Core account operations
+- **Transaction Processing Engine**: High-performance transaction handling
+- **Payment Gateway**: Multi-channel payment processing
+- **Compliance Engine**: Regulatory compliance automation
+
+#### Developer Tools (Open Source)
+- **POM Validator Tool**: Maven project validation (this tool)
+- **API Contract Validator**: OpenAPI specification validation (coming soon)
+- **Security Scanner**: Automated security vulnerability detection (coming soon)
+- **Performance Profiler**: Microservice performance analysis (coming soon)
+
+### Use Cases in Banking
+
+This POM Validator Tool helps ensure:
+- **Dependency Security**: Critical for financial applications
+- **Version Consistency**: Essential for regulatory compliance
+- **Build Reproducibility**: Required for audit trails
+- **Module Isolation**: Important for service boundaries in banking systems
 
 ### Community & Support
 
 - **GitHub Organization**: [firefly-oss](https://github.com/firefly-oss)
+- **Platform Documentation**: [Firefly Docs](https://github.com/firefly-oss/documentation) (coming soon)
 - **Issues & Feature Requests**: [GitHub Issues](https://github.com/firefly-oss/pom-validator-tool/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/firefly-oss/pom-validator-tool/discussions)
+- **Security**: Report security issues to security@firefly-platform.com
 
 ## License
 

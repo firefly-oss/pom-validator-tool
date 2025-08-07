@@ -26,7 +26,8 @@ public class PomValidationService {
             new BasicStructureValidator(),
             new DependencyValidator(),
             new PropertyValidator(),
-            new PluginValidator()
+            new PluginValidator(),
+            new MultiModuleValidator()
             // Temporarily disabled validators with compilation issues:
             // new VersionValidator(),
             // new BestPracticesValidator()
@@ -37,22 +38,20 @@ public class PomValidationService {
      * Validates a POM file and returns comprehensive validation results.
      */
     public ValidationResult validatePom(Path pomPath) throws Exception {
-        ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        ValidationResult result = new ValidationResult();
         
         // Check if file exists
         if (!Files.exists(pomPath)) {
-            return ValidationResult.builder()
-                .error(ValidationIssue.of("POM file does not exist: " + pomPath, 
-                       "Ensure the file path is correct and the file exists"))
-                .build();
+            result.addError(ValidationIssue.of("POM file does not exist: " + pomPath, 
+                       "Ensure the file path is correct and the file exists"));
+            return result;
         }
         
         // Check if it's actually a file
         if (!Files.isRegularFile(pomPath)) {
-            return ValidationResult.builder()
-                .error(ValidationIssue.of("Path is not a regular file: " + pomPath,
-                       "Provide a path to a pom.xml file, not a directory"))
-                .build();
+            result.addError(ValidationIssue.of("Path is not a regular file: " + pomPath,
+                       "Provide a path to a pom.xml file, not a directory"));
+            return result;
         }
         
         try {
@@ -60,10 +59,9 @@ public class PomValidationService {
             Model model = pomParser.parsePom(pomPath);
             
             if (model == null) {
-                return ValidationResult.builder()
-                    .error(ValidationIssue.of("Failed to parse POM file - invalid XML or structure",
-                           "Check that the XML is well-formed and follows Maven POM schema"))
-                    .build();
+                result.addError(ValidationIssue.of("Failed to parse POM file - invalid XML or structure",
+                           "Check that the XML is well-formed and follows Maven POM schema"));
+                return result;
             }
             
             // Run all validators
@@ -71,16 +69,16 @@ public class PomValidationService {
                 ValidationResult validatorResult = validator.validate(model, pomPath);
                 
                 // Merge results
-                validatorResult.getErrors().forEach(resultBuilder::error);
-                validatorResult.getWarnings().forEach(resultBuilder::warning);
-                validatorResult.getInfos().forEach(resultBuilder::info);
+                result.addErrors(validatorResult.getErrors());
+                result.addWarnings(validatorResult.getWarnings());
+                result.addInfos(validatorResult.getInfos());
             }
             
         } catch (Exception e) {
-            resultBuilder.error(ValidationIssue.of("Failed to validate POM: " + e.getMessage(),
+            result.addError(ValidationIssue.of("Failed to validate POM: " + e.getMessage(),
                    "Check the POM syntax and ensure all required elements are present"));
         }
         
-        return resultBuilder.build();
+        return result;
     }
 }
