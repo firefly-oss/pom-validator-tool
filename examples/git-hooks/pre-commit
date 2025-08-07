@@ -1,0 +1,117 @@
+#!/bin/bash
+# Pre-commit hook for POM validation
+# 
+# Installation:
+# 1. Copy this file to .git/hooks/pre-commit
+# 2. Make it executable: chmod +x .git/hooks/pre-commit
+# 
+# This hook will:
+# - Check if any POM files are being committed
+# - Validate all staged POM files using the POM Validator Tool
+# - Prevent commit if validation fails
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Check if pom-validator is installed
+check_pom_validator() {
+    if ! command -v pom-validator >/dev/null 2>&1; then
+        print_error "POM Validator Tool is not installed"
+        print_info "Installing POM Validator Tool..."
+        
+        # Try to install the tool
+        if curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash; then
+            export PATH="$HOME/.local/bin:$PATH"
+            print_success "POM Validator Tool installed successfully"
+        else
+            print_error "Failed to install POM Validator Tool"
+            print_info "Please install it manually:"
+            print_info "curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash"
+            exit 1
+        fi
+    fi
+}
+
+# Main validation function
+validate_poms() {
+    local has_pom_changes=false
+    local validation_failed=false
+    
+    print_info "Checking for POM file changes..."
+    
+    # Check if any POM files are being committed
+    while IFS= read -r file; do
+        if [[ "$file" =~ pom\.xml$ ]]; then
+            has_pom_changes=true
+            break
+        fi
+    done < <(git diff --cached --name-only)
+    
+    if [ "$has_pom_changes" = false ]; then
+        print_info "No POM files changed, skipping validation"
+        exit 0
+    fi
+    
+    print_info "POM files detected, validating..."
+    
+    # Validate each staged POM file
+    while IFS= read -r pom_file; do
+        if [[ "$pom_file" =~ pom\.xml$ ]] && [ -f "$pom_file" ]; then
+            echo
+            print_info "Validating $pom_file"
+            
+            if pom-validator "$pom_file"; then
+                print_success "✅ $pom_file validation passed"
+            else
+                print_error "❌ $pom_file validation failed"
+                validation_failed=true
+            fi
+        fi
+    done < <(git diff --cached --name-only)
+    
+    echo
+    if [ "$validation_failed" = true ]; then
+        print_error "POM validation failed!"
+        print_info "Please fix the issues above before committing."
+        print_info "You can run 'pom-validator pom.xml' to see detailed validation results."
+        exit 1
+    else
+        print_success "✅ All POM files validated successfully!"
+        exit 0
+    fi
+}
+
+# Main execution
+main() {
+    echo "🔍 POM Validation Pre-commit Hook"
+    echo "=================================="
+    
+    check_pom_validator
+    validate_poms
+}
+
+# Run main function
+main "$@"

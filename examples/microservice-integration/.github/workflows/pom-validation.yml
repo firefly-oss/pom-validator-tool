@@ -1,0 +1,253 @@
+# Example: Microservice CI/CD Pipeline with POM Validation
+# Copy this file to .github/workflows/pom-validation.yml in your microservice repository
+
+name: Microservice CI/CD with POM Validation
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Step 1: Validate POM structure and dependencies
+  pom-validation:
+    name: 🔍 POM Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Install POM Validator Tool
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
+    - name: Validate POM structure
+      run: |
+        echo "🔍 Validating POM structure and dependencies..."
+        pom-validator pom.xml
+        
+    - name: Validate all module POMs (if multi-module)
+      run: |
+        if [ -f pom.xml ] && grep -q "<modules>" pom.xml; then
+          echo "📦 Multi-module project detected, validating all POMs..."
+          find . -name "pom.xml" -type f | while read pom; do
+            echo "Validating $pom"
+            pom-validator "$pom"
+          done
+        fi
+        
+  # Step 2: Run unit tests
+  test:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    needs: pom-validation
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Run tests
+      run: mvn clean test
+      
+    - name: Upload test coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        file: ./target/site/jacoco/jacoco.xml
+        
+  # Step 3: Security and quality checks
+  security-scan:
+    name: 🛡️ Security Scan
+    runs-on: ubuntu-latest
+    needs: pom-validation
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Run OWASP dependency check
+      run: |
+        mvn org.owasp:dependency-check-maven:check
+        
+    - name: Upload OWASP report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: owasp-report
+        path: target/dependency-check-report.html
+        
+  # Step 4: Build application
+  build:
+    name: 🏗️ Build Application
+    runs-on: ubuntu-latest
+    needs: [pom-validation, test]
+    
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Extract version from POM
+      id: version
+      run: |
+        VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "📦 Building version: $VERSION"
+        
+    - name: Build application
+      run: mvn clean package -DskipTests
+      
+    - name: Upload JAR artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: application-jar
+        path: target/*.jar
+        retention-days: 30
+        
+  # Step 5: Build and push Docker image
+  docker:
+    name: 🐳 Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download JAR artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: application-jar
+        path: target/
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Login to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=semver,pattern={{version}},value=${{ needs.build.outputs.version }}
+          type=sha,prefix={{branch}}-
+          
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+  # Step 6: Deploy to staging (main branch only)
+  deploy-staging:
+    name: 🚀 Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [docker]
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    
+    steps:
+    - name: Deploy to staging environment
+      run: |
+        echo "🚀 Deploying to staging..."
+        # Add your deployment commands here
+        # kubectl apply -f k8s/staging/
+        # helm upgrade --install myapp ./charts/myapp --namespace staging
+        
+  # Step 7: Integration tests
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run integration tests
+      run: |
+        echo "🔗 Running integration tests against staging..."
+        # mvn clean verify -Pintegration-tests
+        # newman run postman/integration-tests.json
+        
+  # Step 8: Production deployment (manual approval)
+  deploy-production:
+    name: 🌍 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [integration-tests]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Deploy to production
+      run: |
+        echo "🌍 Deploying to production..."
+        # Add your production deployment commands here
+        # kubectl apply -f k8s/production/
+        # helm upgrade --install myapp ./charts/myapp --namespace production

@@ -12,9 +12,45 @@ A comprehensive Java 21 tool for validating Maven POM files, checking for struct
 - **Best Practices**: Enforces Maven best practices and detects common anti-patterns
 - **Fix Suggestions**: Provides specific, actionable suggestions for resolving each identified issue
 
-## Building the Project
+## Installation
+
+### Quick Install (Recommended)
 
 ```bash
+# Download and run the installation script
+curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
+
+# Or with wget
+wget -qO- https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
+```
+
+### Manual Installation
+
+1. **Download the installation script:**
+   ```bash
+   curl -O https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh
+   chmod +x install.sh
+   ```
+
+2. **Run the installer:**
+   ```bash
+   ./install.sh
+   ```
+
+3. **Install from source (requires Maven):**
+   ```bash
+   ./install.sh --source
+   ```
+
+### Manual Build
+
+If you prefer to build manually:
+
+```bash
+# Clone the repository
+git clone https://github.com/firefly-oss/pom-validator-tool.git
+cd pom-validator-tool
+
 # Compile the project
 mvn compile
 
@@ -25,22 +61,46 @@ mvn test
 mvn package
 ```
 
+### Prerequisites
+
+- Java 21 or higher
+- Maven 3.6+ (only for building from source)
+- curl or wget (for installation script)
+
 ## Usage
 
 ### Command Line
+
+After installation, use the `pom-validator` command:
+
+```bash
+# Validate a POM file
+pom-validator pom.xml
+
+# Validate POM in another directory
+pom-validator /path/to/other-project/pom.xml
+
+# Show help
+pom-validator --help
+```
+
+### Direct JAR Usage
+
+If you built manually or want to use the JAR directly:
 
 ```bash
 # Run validation on a POM file
 java -jar target/pom-validator-tool-1.0.0-SNAPSHOT.jar /path/to/pom.xml
 
-# Example with Maven exec plugin (recommended)
+# Example with Maven exec plugin
 mvn exec:java -Dexec.mainClass="com.catalis.tools.pomvalidator.PomValidatorApplication" \
   -Dexec.args="/path/to/pom.xml"
-
-# Validate your own project's POM
-mvn exec:java -Dexec.mainClass="com.catalis.tools.pomvalidator.PomValidatorApplication" \
-  -Dexec.args="pom.xml"
 ```
+
+### Exit Codes
+
+- `0`: POM is valid (no errors found)
+- `1`: POM has errors or validation failed
 
 ### Output
 
@@ -154,6 +214,301 @@ src/
 - Java 21
 - Maven 3.6+
 
+## CI/CD Integration
+
+### GitHub Actions
+
+Integrate POM validation into your CI pipeline:
+
+#### Basic Validation
+
+```yaml
+name: POM Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-pom:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Install POM Validator
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
+    - name: Validate POM
+      run: pom-validator pom.xml
+```
+
+#### Multi-Module Project Validation
+
+```yaml
+name: Multi-Module POM Validation
+
+on: [push, pull_request]
+
+jobs:
+  validate-poms:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Install POM Validator
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
+    - name: Find and validate all POMs
+      run: |
+        find . -name "pom.xml" -type f | while read pom; do
+          echo "Validating $pom"
+          if ! pom-validator "$pom"; then
+            echo "❌ Validation failed for $pom"
+            exit 1
+          fi
+        done
+```
+
+#### Microservice Pipeline Example
+
+```yaml
+name: Microservice CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-checks:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Install POM Validator
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
+    - name: Validate POM structure
+      run: |
+        echo "🔍 Validating POM structure and dependencies..."
+        pom-validator pom.xml
+        
+    - name: Run Maven tests
+      run: mvn clean test
+      
+    - name: Run Maven verify
+      run: mvn verify
+      
+  build:
+    name: Build and Package
+    needs: quality-checks
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Build application
+      run: mvn clean package -DskipTests
+      
+    - name: Build Docker image
+      run: |
+        docker build -t myapp:${{ github.sha }} .
+        docker tag myapp:${{ github.sha }} myapp:latest
+```
+
+### Jenkins Pipeline
+
+```groovy
+pipeline {
+    agent any
+    
+    tools {
+        maven 'Maven-3.9'
+        jdk 'OpenJDK-21'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Install POM Validator') {
+            steps {
+                sh '''
+                    curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
+                    export PATH="$HOME/.local/bin:$PATH"
+                '''
+            }
+        }
+        
+        stage('Validate POM') {
+            steps {
+                sh '$HOME/.local/bin/pom-validator pom.xml'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh 'mvn clean test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                sh 'mvn package -DskipTests'
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
+            }
+        }
+    }
+}
+```
+
+### GitLab CI
+
+```yaml
+stages:
+  - validate
+  - test
+  - build
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  
+cache:
+  paths:
+    - .m2/repository/
+    
+validate-pom:
+  stage: validate
+  image: openjdk:21-jdk
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq curl
+    - curl -fsSL https://raw.githubusercontent.com/firefly-oss/pom-validator-tool/main/install.sh | bash
+    - export PATH="$HOME/.local/bin:$PATH"
+  script:
+    - $HOME/.local/bin/pom-validator pom.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    
+test:
+  stage: test
+  image: maven:3.9-openjdk-21
+  script:
+    - mvn clean test
+  artifacts:
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+        
+build:
+  stage: build
+  image: maven:3.9-openjdk-21
+  script:
+    - mvn package -DskipTests
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 day
+  only:
+    - main
+```
+
+### Pre-commit Hook
+
+Add POM validation to your pre-commit hooks:
+
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit
+
+# Check if POM files are being committed
+if git diff --cached --name-only | grep -q "pom\.xml$"; then
+    echo "🔍 Validating POM files..."
+    
+    # Find all staged POM files and validate them
+    for pom in $(git diff --cached --name-only | grep "pom\.xml$"); do
+        if [ -f "$pom" ]; then
+            echo "Validating $pom"
+            if ! pom-validator "$pom"; then
+                echo "❌ POM validation failed for $pom"
+                echo "Please fix the issues before committing."
+                exit 1
+            fi
+        fi
+    done
+    
+    echo "✅ All POM files validated successfully"
+fi
+
+exit 0
+```
+
+Make it executable:
+```bash
+chmod +x .git/hooks/pre-commit
+```
+
 ## Contributing
 
 To add new validators:
@@ -164,4 +519,6 @@ To add new validators:
 
 ## License
 
-This project provides Maven POM validation capabilities.
+This project is licensed under the Apache License, Version 2.0.
+
+See the [LICENSE](LICENSE) file for details.
