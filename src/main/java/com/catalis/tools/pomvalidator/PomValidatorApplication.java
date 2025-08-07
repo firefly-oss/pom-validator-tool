@@ -4,6 +4,7 @@ import com.catalis.tools.pomvalidator.cli.CliOptions;
 import com.catalis.tools.pomvalidator.feature.OutputFormatter;
 import com.catalis.tools.pomvalidator.feature.WatchMode;
 import com.catalis.tools.pomvalidator.feature.InteractiveMode;
+import com.catalis.tools.pomvalidator.feature.AutoFixMode;
 import com.catalis.tools.pomvalidator.feature.formatter.JsonFormatter;
 import com.catalis.tools.pomvalidator.feature.formatter.MarkdownFormatter;
 import com.catalis.tools.pomvalidator.service.PomValidationService;
@@ -65,6 +66,8 @@ public class PomValidatorApplication {
                 app.runWatchMode(options);
             } else if (options.isInteractive()) {
                 app.runInteractiveMode(options);
+            } else if (options.isAutoFix()) {
+                app.runAutoFixMode(options);
             } else {
                 app.runValidation(options);
             }
@@ -110,6 +113,22 @@ public class PomValidatorApplication {
         
         InteractiveMode interactive = new InteractiveMode();
         interactive.runInteractive(targetPath);
+    }
+    
+    private void runAutoFixMode(CliOptions options) throws Exception {
+        Path targetPath = options.getTargetPath();
+        
+        // If directory, look for pom.xml
+        if (Files.isDirectory(targetPath)) {
+            targetPath = targetPath.resolve("pom.xml");
+        }
+        
+        if (!Files.exists(targetPath)) {
+            throw new IllegalArgumentException("POM file not found: " + targetPath);
+        }
+        
+        AutoFixMode autoFix = new AutoFixMode();
+        autoFix.runAutoFix(targetPath, true); // Always create backup in auto-fix mode
     }
     
     private void runValidation(CliOptions options) throws Exception {
