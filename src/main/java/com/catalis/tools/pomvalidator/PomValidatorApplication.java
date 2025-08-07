@@ -11,6 +11,8 @@ import com.catalis.tools.pomvalidator.feature.formatter.MarkdownFormatter;
 import com.catalis.tools.pomvalidator.service.PomValidationService;
 import com.catalis.tools.pomvalidator.model.ValidationResult;
 import com.catalis.tools.pomvalidator.model.ValidationIssue;
+import com.catalis.tools.pomvalidator.util.PomParser;
+import com.catalis.tools.pomvalidator.util.ProjectTypeDetector;
 import org.apache.maven.model.Model;
 
 import java.io.IOException;
@@ -197,9 +199,15 @@ public class PomValidatorApplication {
         Map<Path, ValidationResult> results = new LinkedHashMap<>();
         
         if (!options.isQuiet() && poms.size() > 1) {
-            System.out.println();
-            System.out.println(BOLD + PURPLE + "🔍 Validating " + poms.size() + " POM files..." + RESET);
-            System.out.println();
+            CliUI ui = new CliUI();
+            ui.newLine();
+            ui.println(ui.bold(ui.purple("🔍 Analyzing Maven Project Structure...")));
+            
+            // Analyze project structure
+            analyzeProjectStructure(poms, ui);
+            
+            ui.println(ui.bold(ui.purple("🔍 Validating " + poms.size() + " POM files...")));
+            ui.newLine();
         }
         
         for (Path pomPath : poms) {
@@ -455,8 +463,26 @@ public class PomValidatorApplication {
             relativePath = pomPath.getFileName().toString();
         }
         
+        // Detect project type
+        ProjectTypeDetector.ProjectStructureInfo projectInfo = null;
+        try {
+            PomParser parser = new PomParser();
+            Model model = parser.parsePom(pomPath);
+            if (model != null) {
+                projectInfo = ProjectTypeDetector.detectProjectStructure(model, pomPath);
+            }
+        } catch (Exception e) {
+            // Ignore errors in type detection
+        }
+        
         // File header
         ui.println(ui.bold("=== " + relativePath + " ==="));
+        
+        // Display project type
+        if (projectInfo != null) {
+            ui.println("Type: " + ui.cyan(projectInfo.getType().getDisplayName()));
+        }
+        
         ui.println("Status: " + (result.isValid() ? 
             ui.green("✅ VALID") : 
             ui.red("❌ INVALID")));
@@ -511,6 +537,33 @@ public class PomValidatorApplication {
                    result.getInfos().size() + " info messages");
         ui.printDivider('━');
         ui.newLine();
+    }
+    
+    private void analyzeProjectStructure(List<Path> poms, CliUI ui) {
+        Map<ProjectTypeDetector.ProjectType, Integer> typeCount = new HashMap<>();
+        PomParser parser = new PomParser();
+        
+        for (Path pomPath : poms) {
+            try {
+                Model model = parser.parsePom(pomPath);
+                if (model != null) {
+                    ProjectTypeDetector.ProjectType type = ProjectTypeDetector.detectProjectType(model, pomPath);
+                    typeCount.merge(type, 1, Integer::sum);
+                }
+            } catch (Exception e) {
+                // Ignore parsing errors during structure analysis
+            }
+        }
+        
+        // Display structure summary
+        if (!typeCount.isEmpty()) {
+            ui.println(ui.dim("Project Structure Detected:"));
+            typeCount.forEach((type, count) -> {
+                String countStr = count > 1 ? " (" + count + ")" : "";
+                ui.println("  " + type.getIcon() + " " + ui.gray(type.getDescription() + countStr));
+            });
+            ui.newLine();
+        }
     }
     
     private void printSummary(Map<Path, ValidationResult> results, int totalErrors, int totalWarnings, int totalInfos) {
