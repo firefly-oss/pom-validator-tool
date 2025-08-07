@@ -1,6 +1,6 @@
 # POM Validator Tool
 
-A comprehensive Java 21 tool for validating Maven POM files, checking for structure issues, dependency problems, version conflicts, and best practices violations.
+A comprehensive Java 21 tool for validating Maven POM files, checking for structure issues, dependency problems, version conflicts, and best practices violations. The tool provides actionable suggestions for fixing detected issues.
 
 ## Features
 
@@ -10,6 +10,7 @@ A comprehensive Java 21 tool for validating Maven POM files, checking for struct
 - **Plugin Validation**: Validates plugin configurations and checks for missing versions
 - **Version Validation**: Checks version format compliance and consistency
 - **Best Practices**: Enforces Maven best practices and detects common anti-patterns
+- **Fix Suggestions**: Provides specific, actionable suggestions for resolving each identified issue
 
 ## Building the Project
 
@@ -32,17 +33,25 @@ mvn package
 # Run validation on a POM file
 java -jar target/pom-validator-tool-1.0.0-SNAPSHOT.jar /path/to/pom.xml
 
-# Example with the parent POM
-java -jar target/pom-validator-tool-1.0.0-SNAPSHOT.jar $HOME/Development/lib-parent-pom/pom.xml
+# Example with Maven exec plugin (recommended)
+mvn exec:java -Dexec.mainClass="com.catalis.tools.pomvalidator.PomValidatorApplication" \
+  -Dexec.args="/path/to/pom.xml"
+
+# Validate your own project's POM
+mvn exec:java -Dexec.mainClass="com.catalis.tools.pomvalidator.PomValidatorApplication" \
+  -Dexec.args="pom.xml"
 ```
 
 ### Output
 
-The tool provides three types of feedback:
+The tool provides three types of feedback with actionable suggestions:
 
 - **❌ ERRORS**: Critical issues that make the POM invalid
-- **⚠️ WARNINGS**: Issues that should be addressed but don't break functionality  
-- **ℹ️ INFO**: Informational messages and suggestions
+  - 💡 **Fix**: Specific instructions for resolving the error
+- **⚠️ WARNINGS**: Issues that should be addressed but don't break functionality
+  - 💡 **Suggestion**: Recommended actions for improvement
+- **ℹ️ INFO**: Informational messages and tips
+  - 💡 **Tip**: Additional guidance when applicable
 
 ## Validation Categories
 
@@ -84,24 +93,29 @@ The tool provides three types of feedback:
 - Naming convention compliance
 - Anti-pattern detection
 
-## Testing with Parent POM
+## Example Output
 
-To test the tool with the provided parent POM:
+The tool provides detailed feedback with suggestions:
 
-```bash
-# Build the tool
-mvn clean package
-
-# Test with parent POM
-java -jar target/pom-validator-tool-1.0.0-SNAPSHOT.jar $HOME/Development/lib-parent-pom/pom.xml
 ```
+=== POM Validation Results ===
+File: /path/to/pom.xml
+Status: INVALID
 
-Expected validations for the parent POM:
-- ✅ Well-structured parent POM with proper dependency management
-- ✅ Java 21 configuration
-- ✅ Comprehensive property definitions
-- ✅ Plugin management setup
-- ℹ️ Informational messages about Spring Boot and Maven configuration
+ERRORS:
+  ❌ Missing groupId
+     💡 Fix: Add <groupId>com.example</groupId> element to identify your organization/project
+
+WARNINGS:
+  ⚠️  Java version and compiler source mismatch: 21 vs ${java.version}
+     💡 Suggestion: Set <maven.compiler.source>${java.version}</maven.compiler.source>
+
+INFO:
+  ℹ️  GAV: com.example:my-project:1.0.0-SNAPSHOT
+     💡 Tip: Consider using semantic versioning for releases
+
+Summary: 1 errors, 1 warnings, 1 info messages
+```
 
 ## Development
 
@@ -140,6 +154,14 @@ src/
 - Java 21
 - Maven 3.6+
 
+## Contributing
+
+To add new validators:
+1. Implement the `PomValidator` interface
+2. Use `ValidationIssue.of(message, suggestion)` for actionable feedback
+3. Register the validator in `PomValidationService`
+4. Add comprehensive unit tests
+
 ## License
 
-This project is part of the Catalis development tools suite.
+This project provides Maven POM validation capabilities.
