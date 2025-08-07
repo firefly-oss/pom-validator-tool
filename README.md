@@ -11,6 +11,30 @@
 
 A comprehensive Java 21 tool for validating Maven POM files, checking for structure issues, dependency problems, version conflicts, and best practices violations. The tool provides actionable suggestions for fixing detected issues.
 
+## 📑 Table of Contents
+- [🔥 About Firefly OpenCore Banking Platform](#-about-firefly-opencore-banking-platform)
+  - [Platform Integration](#platform-integration)
+- [Features](#features)
+- [🚀 Quick Start](#-quick-start)
+  - [Installation](#installation)
+  - [Uninstallation](#uninstallation)
+  - [Basic Usage](#basic-usage)
+- [📚 Documentation](#-documentation)
+- [✨ Key Features](#-key-features)
+  - [🔍 Comprehensive Validation](#-comprehensive-validation)
+  - [🛠️ Advanced Modes](#️-advanced-modes)
+  - [🎯 Smart Features](#-smart-features)
+- [💡 Example Output](#-example-output)
+- [CI/CD Integration](#cicd-integration)
+  - [GitHub Actions](#github-actions)
+  - [Jenkins Pipeline](#jenkins-pipeline)
+  - [GitLab CI](#gitlab-ci)
+  - [Pre-commit Hook](#pre-commit-hook)
+- [Contributing](#contributing)
+- [🏦 Firefly OpenCore Banking Platform](#-firefly-opencore-banking-platform)
+  - [Why Open Source?](#why-open-source)
+- [License](#license)
+
 ## 🔥 About Firefly OpenCore Banking Platform
 
 **Firefly** is an **OpenCore Banking Platform** that provides modern, cloud-native infrastructure for financial services. As part of our commitment to the open-source community, we're releasing a suite of development tools that we use internally to maintain code quality and consistency across our microservices architecture.
@@ -451,48 +475,8 @@ As a fintech platform, we believe in:
 - **Innovation**: Shared tools accelerate fintech innovation
 - **Standards**: Common tooling promotes industry best practices
 
-### Firefly Platform Components
-
-#### Core Banking Services (Coming Soon)
-- **Account Management Service**: Core account operations
-- **Transaction Processing Engine**: High-performance transaction handling
-- **Payment Gateway**: Multi-channel payment processing
-- **Compliance Engine**: Regulatory compliance automation
-
-#### Developer Tools (Open Source)
-- **POM Validator Tool**: Maven project validation (this tool)
-- **API Contract Validator**: OpenAPI specification validation (coming soon)
-- **Security Scanner**: Automated security vulnerability detection (coming soon)
-- **Performance Profiler**: Microservice performance analysis (coming soon)
-
-### Use Cases in Banking
-
-This POM Validator Tool helps ensure:
-- **Dependency Security**: Critical for financial applications
-- **Version Consistency**: Essential for regulatory compliance
-- **Build Reproducibility**: Required for audit trails
-- **Module Isolation**: Important for service boundaries in banking systems
-
-### Community & Support
-
-- **GitHub Organization**: [firefly-oss](https://github.com/firefly-oss)
-- **Platform Documentation**: [Firefly Docs](https://github.com/firefly-oss/documentation) (coming soon)
-- **Issues & Feature Requests**: [GitHub Issues](https://github.com/firefly-oss/pom-validator-tool/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/firefly-oss/pom-validator-tool/discussions)
-- **Security**: Report security issues to security@firefly-platform.com
-
 ## License
 
 This project is licensed under the Apache License, Version 2.0.
 
 See the [LICENSE](LICENSE) file for details.
-
----
-
-<p align="center">
-  <strong>🔥 Firefly Platform Toolset</strong><br>
-  <em>Enterprise-grade tools for modern Java development</em><br><br>
-  <a href="https://github.com/firefly-oss">🌟 Explore More Tools</a> |
-  <a href="https://github.com/firefly-oss/pom-validator-tool/issues">🐛 Report Issues</a> |
-  <a href="https://github.com/firefly-oss/pom-validator-tool/discussions">💬 Join Discussions</a>
-</p>
