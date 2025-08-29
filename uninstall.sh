@@ -306,7 +306,7 @@ clean_cache() {
     local cache_dirs=(
         "$HOME/.cache/pom-validator"
         "/tmp/pom-validator*"
-        "$HOME/.m2/repository/com/catalis/tools/pom-validator-tool"
+        "$HOME/.m2/repository/com/firefly/tools/pom-validator-tool"
     )
     
     for cache in "${cache_dirs[@]}"; do
