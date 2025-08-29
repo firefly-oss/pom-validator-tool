@@ -19,8 +19,8 @@ The POM Validator Tool can be used programmatically as a library in your Java ap
 Main service class for validating POM files.
 
 ```java
-import com.firefly.tools.pomvalidator.service.PomValidationService;
-import com.firefly.tools.pomvalidator.model.ValidationResult;
+import com.catalis.tools.pomvalidator.service.PomValidationService;
+import com.catalis.tools.pomvalidator.model.ValidationResult;
 import java.nio.file.Path;
 
 // Create service instance
@@ -158,7 +158,7 @@ Checks:
 Interactive fixing of validation issues.
 
 ```java
-import com.firefly.tools.pomvalidator.feature.InteractiveMode;
+import com.catalis.tools.pomvalidator.feature.InteractiveMode;
 
 InteractiveMode interactive = new InteractiveMode();
 interactive.runInteractive(pomPath);
@@ -169,7 +169,7 @@ interactive.runInteractive(pomPath);
 Automatic fixing of common issues.
 
 ```java
-import com.firefly.tools.pomvalidator.feature.AutoFixMode;
+import com.catalis.tools.pomvalidator.feature.AutoFixMode;
 
 AutoFixMode autoFix = new AutoFixMode();
 autoFix.runAutoFix(pomPath, true); // true = create backup
@@ -180,7 +180,7 @@ autoFix.runAutoFix(pomPath, true); // true = create backup
 Monitor POM files for changes.
 
 ```java
-import com.firefly.tools.pomvalidator.feature.WatchMode;
+import com.catalis.tools.pomvalidator.feature.WatchMode;
 
 WatchMode watchMode = new WatchMode();
 watchMode.watch(rootPath, true); // true = recursive
@@ -202,7 +202,7 @@ public interface OutputFormatter {
 Format results as JSON.
 
 ```java
-import com.firefly.tools.pomvalidator.feature.formatter.JsonFormatter;
+import com.catalis.tools.pomvalidator.feature.formatter.JsonFormatter;
 
 OutputFormatter formatter = new JsonFormatter();
 String json = formatter.format(results);
@@ -214,7 +214,7 @@ formatter.write(results, Path.of("report.json"));
 Format results as Markdown.
 
 ```java
-import com.firefly.tools.pomvalidator.feature.formatter.MarkdownFormatter;
+import com.catalis.tools.pomvalidator.feature.formatter.MarkdownFormatter;
 
 OutputFormatter formatter = new MarkdownFormatter();
 String markdown = formatter.format(results);
@@ -226,8 +226,8 @@ formatter.write(results, Path.of("report.md"));
 ### Basic Validation
 
 ```java
-import com.firefly.tools.pomvalidator.service.PomValidationService;
-import com.firefly.tools.pomvalidator.model.ValidationResult;
+import com.catalis.tools.pomvalidator.service.PomValidationService;
+import com.catalis.tools.pomvalidator.model.ValidationResult;
 import java.nio.file.Path;
 
 public class Example {
@@ -259,7 +259,7 @@ public class Example {
 ### Multi-Module Validation
 
 ```java
-import com.firefly.tools.pomvalidator.service.PomValidationService;
+import com.catalis.tools.pomvalidator.service.PomValidationService;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
@@ -296,8 +296,8 @@ public class MultiModuleExample {
 ### Custom Validator
 
 ```java
-import com.firefly.tools.pomvalidator.validator.PomValidator;
-import com.firefly.tools.pomvalidator.model.*;
+import com.catalis.tools.pomvalidator.validator.PomValidator;
+import com.catalis.tools.pomvalidator.model.*;
 import org.apache.maven.model.Model;
 import java.nio.file.Path;
 
@@ -336,7 +336,7 @@ public class CustomValidator implements PomValidator {
 
 ```xml
 <plugin>
-    <groupId>com.firefly.tools</groupId>
+    <groupId>com.catalis.tools</groupId>
     <artifactId>pom-validator-maven-plugin</artifactId>
     <version>1.0.0</version>
     <executions>
@@ -358,7 +358,7 @@ public class CustomValidator implements PomValidator {
 
 ```groovy
 plugins {
-    id 'com.firefly.tools.pom-validator' version '1.0.0'
+    id 'com.catalis.tools.pom-validator' version '1.0.0'
 }
 
 pomValidator {
@@ -372,7 +372,7 @@ pomValidator {
 ### Programmatic CLI Options
 
 ```java
-import com.firefly.tools.pomvalidator.cli.CliOptions;
+import com.catalis.tools.pomvalidator.cli.CliOptions;
 
 // Parse command line arguments
 CliOptions options = CliOptions.parse(args);

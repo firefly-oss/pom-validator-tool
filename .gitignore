@@ -19,10 +19,11 @@ buildNumber.properties
 .settings/
 .project
 .classpath
-
 # OS
 .DS_Store
 Thumbs.db
-
 # Logs
 *.log
+# Refactoring backup directories
+.refactor-backup-*/
+*.refactor-backup-*
